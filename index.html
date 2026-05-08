@@ -1,0 +1,2047 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Termiz Barber</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Outfit:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+/* ============================================================
+   CONFIG — replace SUPABASE_URL and SUPABASE_ANON_KEY below
+   ============================================================ */
+
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+
+/* ============================================================
+   SHARED BASE
+   ============================================================ */
+:root{
+  /* Client colors */
+  --void:#080608;--void2:#0F0B10;--void3:#150F18;--void4:#1D1622;--void5:#261E2E;
+  --ember:#D4802A;--ember2:#F0A842;--ember3:#9A5A14;--emberfade:rgba(212,128,42,0.12);
+  --glow:rgba(240,168,66,0.08);
+  --ink:#EDE8E0;--ink2:#A89888;--ink3:#6A5A50;--ink4:#3D3030;
+  --emerald:#4ECDC4;--emfade:rgba(78,205,196,0.1);
+  --rose:#E8726A;--rosefade:rgba(232,114,106,0.1);
+  /* Admin colors */
+  --bg:#0D0D0F;--bg2:#141416;--bg3:#1A1A1E;--bg4:#222228;--bg5:#2A2A32;
+  --border:#2A2A32;--border2:#353540;
+  --gold:#F0B429;--gold2:#FFD166;--gold3:#C8920A;--goldfade:rgba(240,180,41,0.1);
+  --atext:#E8E8F0;--atext2:#9090A8;--atext3:#606078;
+  --green:#06D6A0;--greenfade:rgba(6,214,160,0.08);
+  --red:#EF4565;--redfade:rgba(239,69,101,0.08);
+  --blue:#4CC9F0;--bluefade:rgba(76,201,240,0.08);
+}
+html,body{min-height:100vh;overflow-x:hidden}
+body{font-family:'Outfit',sans-serif}
+
+/* ============================================================
+   LOADING SCREEN
+   ============================================================ */
+#loading-screen{
+  position:fixed;inset:0;background:#080608;z-index:9999;
+  display:flex;align-items:center;justify-content:center;flex-direction:column;gap:0;
+  transition:opacity .6s ease;
+}
+#loading-screen.fade{opacity:0;pointer-events:none}
+.ld-ring{
+  width:90px;height:90px;border-radius:50%;border:1px solid #261E2E;
+  display:flex;align-items:center;justify-content:center;position:relative;margin-bottom:24px;
+}
+.ld-ring::before{
+  content:'';position:absolute;inset:-8px;border-radius:50%;
+  border:1px solid rgba(212,128,42,0.2);
+  animation:ldspin 3s linear infinite;
+}
+@keyframes ldspin{to{transform:rotate(360deg)}}
+.ld-scissors{font-size:32px}
+.ld-title{
+  font-family:'Playfair Display',serif;font-size:20px;font-weight:900;
+  letter-spacing:5px;color:#F0A842;text-align:center;
+}
+.ld-bar{width:140px;height:2px;background:#1D1622;border-radius:1px;margin-top:20px;overflow:hidden}
+.ld-progress{height:100%;background:#D4802A;border-radius:1px;animation:ldbar 1.8s ease forwards}
+@keyframes ldbar{from{width:0}to{width:100%}}
+.ld-status{font-size:11px;color:#6A5A50;letter-spacing:2px;margin-top:12px;font-family:'DM Mono',monospace}
+
+/* ============================================================
+   ERROR SCREEN
+   ============================================================ */
+#error-screen{
+  position:fixed;inset:0;background:#080608;z-index:9998;
+  display:none;align-items:center;justify-content:center;flex-direction:column;
+  padding:24px;text-align:center;color:#EDE8E0;font-family:'Outfit',sans-serif;
+}
+#error-screen.show{display:flex}
+.err-icon{font-size:48px;margin-bottom:16px;opacity:.5}
+.err-title{font-family:'Playfair Display',serif;font-size:22px;color:#F0A842;margin-bottom:8px}
+.err-msg{font-size:13px;color:#6A5A50;line-height:1.6;max-width:300px}
+
+/* ============================================================
+   CLIENT PANEL STYLES
+   ============================================================ */
+#client-app{
+  display:none;
+  background:#080608;min-height:100vh;color:#EDE8E0;
+}
+#client-app.show{display:block}
+#client-app::after{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:998;opacity:.5;
+}
+.c-app{max-width:430px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;background:#080608;position:relative;padding-bottom:0}
+.c-ambient{position:fixed;top:-120px;left:50%;transform:translateX(-50%);width:500px;height:500px;background:radial-gradient(ellipse,rgba(212,128,42,0.05) 0%,transparent 65%);pointer-events:none;z-index:0}
+.c-header{position:sticky;top:0;z-index:100;padding:0 16px;background:linear-gradient(180deg,#080608 0%,rgba(8,6,8,0) 100%)}
+.c-header-inner{padding:14px 0 10px;display:flex;flex-direction:column}
+.c-header-top{display:flex;align-items:center;justify-content:space-between;padding-bottom:2px}
+.c-brand{display:flex;align-items:center;gap:10px}
+.c-gem{width:36px;height:36px;background:linear-gradient(135deg,#9A5A14,#D4802A);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;position:relative}
+.c-gem::after{content:'';position:absolute;inset:0;border-radius:10px;background:linear-gradient(135deg,transparent,rgba(255,255,255,.12))}
+.c-wordmark{font-family:'Playfair Display',serif;font-size:16px;font-weight:900;letter-spacing:3px;color:#F0A842}
+.c-sub{font-size:9px;letter-spacing:2px;color:#6A5A50;text-transform:uppercase;margin-top:1px}
+.c-hactions{display:flex;gap:8px;align-items:center}
+.c-hbtn{width:36px;height:36px;border-radius:10px;background:#150F18;border:1px solid #1D1622;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s;position:relative;color:#A89888}
+.c-hbtn:hover{border-color:#9A5A14;color:#D4802A}
+.c-pip{position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:#D4802A;border:1.5px solid #080608}
+/* Client fixed bottom nav */
+#c-bottom-nav{
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;
+  background:rgba(8,6,8,0.94);border-top:1px solid #1D1622;
+  z-index:200;padding:6px 0 env(safe-area-inset-bottom,6px);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+}
+.c-bn-items{display:flex;justify-content:space-around;align-items:center}
+.c-nt{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 14px;border-radius:12px;cursor:pointer;transition:.2s;font-size:9px;font-weight:600;color:#6A5A50;letter-spacing:.5px;text-transform:uppercase;border:none;background:transparent;font-family:'Outfit',sans-serif;min-width:56px}
+.c-nt svg{width:20px;height:20px;stroke-width:1.8;transition:.2s;stroke:#6A5A50}
+.c-nt.active{color:#F0A842}
+.c-nt.active svg{stroke:#F0A842}
+/* Missing admin badge + action button styles */
+.a-badge{display:inline-flex;align-items:center;padding:4px 10px;border-radius:20px;font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.a-badge-gold{background:rgba(240,180,41,.1);color:#F0B429;border:1px solid rgba(240,180,41,.2)}
+.a-badge-green{background:rgba(6,214,160,.08);color:#06D6A0;border:1px solid rgba(6,214,160,.2)}
+.a-badge-red{background:rgba(239,69,101,.08);color:#EF4565;border:1px solid rgba(239,69,101,.2)}
+.a-act-btn{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s;border:1px solid #353540;background:#1A1A1E;color:#9090A8}
+.a-act-btn:hover{transform:scale(1.08)}
+.a-act-btn.edit{border-color:rgba(240,180,41,.3);color:#F0B429}
+.a-act-btn.edit:hover{background:rgba(240,180,41,.1)}
+.a-act-btn.view-btn{border-color:rgba(76,201,240,.3);color:#4CC9F0}
+.a-act-btn.view-btn:hover{background:rgba(76,201,240,.08)}
+.a-act-btn.del{border-color:rgba(239,69,101,.3);color:#EF4565}
+.a-act-btn.del:hover{background:rgba(239,69,101,.08)}
+.a-td-actions{display:flex;gap:6px;align-items:center}
+/* Barber grid */
+.a-barber-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.a-bmc{background:#141416;border:1px solid #2A2A32;border-radius:14px;padding:20px;text-align:center;transition:.2s;position:relative}
+.a-bmc:hover{border-color:#353540;transform:translateY(-2px)}
+.a-bmc-toggle{position:absolute;top:12px;right:12px}
+.a-bmc-ava{width:64px;height:64px;border-radius:50%;background:rgba(240,180,41,.08);border:2px solid rgba(240,180,41,.15);margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:28px;color:#F0B429;overflow:hidden;position:relative}
+.a-bmc-ava img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.a-bmc-name{font-size:15px;font-weight:700;color:#E8E8F0;margin-bottom:3px}
+.a-bmc-role{font-size:10px;color:#9090A8;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
+.a-bmc-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.a-bmc-stat{background:#1A1A1E;border-radius:8px;padding:8px}
+.a-bmc-sval{font-family:'Bebas Neue',sans-serif;font-size:20px;color:#F0B429;line-height:1}
+.a-bmc-slbl{font-size:9px;color:#606078;text-transform:uppercase;letter-spacing:.8px;margin-top:2px}
+.a-bmc-actions{display:flex;gap:8px;margin-top:12px}
+.c-panel{display:none;flex:1;position:relative;z-index:1;animation:pIn .35s ease}
+.c-panel.active{display:block}
+@keyframes pIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* Client component styles */
+.c-wrap{padding:16px;padding-bottom:90px}
+.hero-band{margin-bottom:20px}
+.hero-img-wrap{height:200px;border-radius:20px;background:linear-gradient(135deg,#0F0B10,#150F18);border:1px solid #1D1622;overflow:hidden;position:relative}
+.hero-gradient{position:absolute;inset:0;background:linear-gradient(to top,#080608 0%,transparent 60%)}
+.hero-img-content{position:absolute;bottom:0;left:0;right:0;padding:20px}
+.hero-deco{position:absolute;top:16px;right:16px;width:90px;height:90px;border:1px solid rgba(212,128,42,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center}
+.hero-deco::after{content:'✂';font-size:30px;opacity:.1;transform:rotate(-30deg);display:block}
+.hero-open-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(78,205,196,0.12);border:1px solid rgba(78,205,196,0.2);border-radius:20px;padding:4px 12px;font-size:10px;color:#4ECDC4;font-weight:600;letter-spacing:.8px;margin-bottom:10px}
+.hero-open-badge::before{content:'';width:5px;height:5px;border-radius:50%;background:#4ECDC4;animation:bl 1.5s ease infinite}
+@keyframes bl{0%,100%{opacity:1}50%{opacity:.3}}
+.hero-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:900;line-height:1.1;letter-spacing:.5px;color:#EDE8E0}
+.hero-title em{color:#F0A842;font-style:italic}
+.sr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:24px}
+.sr-item{background:#0F0B10;border:1px solid #1D1622;border-radius:14px;padding:14px 10px;text-align:center}
+.sr-val{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#F0A842}
+.sr-lbl{font-size:9px;color:#6A5A50;letter-spacing:1px;text-transform:uppercase;margin-top:4px}
+.sect{margin-bottom:24px}
+.sect-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.sect-lbl{font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#6A5A50;display:flex;align-items:center;gap:8px}
+.sect-lbl::before{content:'';width:2px;height:14px;background:#D4802A;border-radius:1px}
+.sect-more{font-size:11px;color:#6A5A50;cursor:pointer;transition:.2s}
+.sect-more:hover{color:#D4802A}
+.b-row{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.b-row::-webkit-scrollbar{display:none}
+.bc{width:105px;flex-shrink:0;background:#0F0B10;border:1px solid #1D1622;border-radius:18px;padding:14px 10px 12px;text-align:center;cursor:pointer;transition:all .25s;position:relative}
+.bc:hover{border-color:#261E2E;transform:translateY(-3px)}
+.bc.s{border-color:#9A5A14;background:rgba(212,128,42,0.08)}
+.bc-ava{width:48px;height:48px;border-radius:50%;background:#150F18;margin:0 auto 10px;border:1.5px solid #1D1622;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:#F0A842;overflow:hidden}
+.bc.s .bc-ava{border-color:#D4802A}
+.bc-ava img{width:100%;height:100%;object-fit:cover}
+.bc-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#EDE8E0}
+.bc-role{font-size:8px;color:#9A5A14;letter-spacing:1px;text-transform:uppercase;margin-bottom:5px}
+.bc-stars{font-size:10px;color:#6A5A50}
+.bc-stars b{color:#F0A842}
+.svc-row{display:flex;align-items:center;gap:12px;padding:13px;background:#0F0B10;border:1px solid #1D1622;border-radius:14px;margin-bottom:8px;cursor:pointer;transition:.2s}
+.svc-row:hover{border-color:#261E2E}
+.svc-ico{width:38px;height:38px;background:#150F18;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.svc-info{flex:1;min-width:0}
+.svc-nm{font-size:13px;font-weight:600;color:#EDE8E0}
+.svc-tm{font-size:10px;color:#6A5A50;font-family:'DM Mono',monospace}
+.svc-pr{font-family:'Playfair Display',serif;font-size:18px;color:#F0A842;flex-shrink:0}
+.c-cta{background:linear-gradient(135deg,#9A5A14,#D4802A);border:none;border-radius:16px;padding:17px;width:100%;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;color:#080608;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;letter-spacing:.3px;position:relative;overflow:hidden;transition:.2s;margin-bottom:20px}
+.c-cta::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.1),transparent)}
+.c-cta:hover{transform:translateY(-2px);box-shadow:0 10px 40px rgba(212,128,42,.2)}
+.c-cta:active{transform:scale(.98)}
+
+/* Booking steps */
+.steps{display:flex;align-items:center;gap:4px;margin-bottom:22px}
+.step-line{flex:1;height:1px;background:#1D1622;transition:.3s}
+.step-line.done{background:#9A5A14}
+.step-dot{width:28px;height:28px;border-radius:50%;border:1.5px solid #1D1622;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#6A5A50;transition:.3s;font-family:'DM Mono',monospace;flex-shrink:0}
+.step-dot.active{border-color:#D4802A;color:#D4802A;background:rgba(212,128,42,.1)}
+.step-dot.done{border-color:#9A5A14;background:#9A5A14;color:#080608;font-size:12px}
+.bk-lbl{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#6A5A50;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.bk-lbl::before{content:'';width:2px;height:12px;background:#D4802A;border-radius:1px}
+.bk-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.bk-bc{background:#0F0B10;border:1.5px solid #1D1622;border-radius:16px;padding:16px;text-align:center;cursor:pointer;transition:.25s;position:relative;overflow:hidden}
+.bk-bc:hover{border-color:#261E2E}
+.bk-bc.s{border-color:#D4802A;background:rgba(212,128,42,0.06)}
+.bk-bc.s::after{content:'✓';position:absolute;top:10px;right:10px;width:20px;height:20px;border-radius:50%;background:#D4802A;color:#080608;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:20px}
+.bk-ava{width:54px;height:54px;border-radius:50%;background:#150F18;margin:0 auto 10px;border:2px solid #1D1622;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:22px;color:#F0A842;overflow:hidden;transition:.2s}
+.bk-bc.s .bk-ava{border-color:#D4802A}
+.bk-ava img{width:100%;height:100%;object-fit:cover}
+.bk-bname{font-size:14px;font-weight:600;color:#EDE8E0;margin-bottom:2px}
+.bk-brole{font-size:9px;color:#9A5A14;letter-spacing:1px;text-transform:uppercase;margin-bottom:5px}
+.bk-bstars{font-size:11px;color:#6A5A50}
+.bk-bstars span{color:#F0A842}
+.bk-svc-item{background:#0F0B10;border:1.5px solid #1D1622;border-radius:14px;padding:13px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:.2s;margin-bottom:8px}
+.bk-svc-item:hover{border-color:#261E2E}
+.bk-svc-item.s{border-color:#D4802A;background:rgba(212,128,42,0.05)}
+.bk-svc-ico{width:38px;height:38px;background:#150F18;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.bk-svc-item.s .bk-svc-ico{background:rgba(212,128,42,.12)}
+.bk-svc-info{flex:1;min-width:0}
+.bk-svc-nm{font-size:13px;font-weight:500;color:#EDE8E0}
+.bk-svc-tm{font-size:10px;color:#6A5A50;font-family:'DM Mono',monospace;margin-top:1px}
+.bk-svc-pr{font-family:'Playfair Display',serif;font-size:18px;color:#F0A842;flex-shrink:0}
+.bk-svc-chk{width:22px;height:22px;border-radius:50%;border:1.5px solid #1D1622;transition:.25s;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:transparent}
+.bk-svc-item.s .bk-svc-chk{background:#D4802A;border-color:#D4802A;color:#080608}
+/* Calendar */
+.cal-box{background:#0F0B10;border:1px solid #1D1622;border-radius:16px;padding:16px;margin-bottom:14px}
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.cal-month-lbl{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:#EDE8E0}
+.cal-nav-btn{width:30px;height:30px;background:#150F18;border:1px solid #1D1622;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#A89888;transition:.2s;user-select:none;font-size:16px}
+.cal-nav-btn:hover{border-color:#9A5A14;color:#D4802A}
+.cal-dh-row{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px}
+.cal-dh{text-align:center;font-size:9px;color:#6A5A50;font-weight:700;letter-spacing:.8px;padding:4px 0;font-family:'DM Mono',monospace}
+.cal-days{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cday{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:8px;cursor:pointer;font-size:12px;font-weight:500;color:#EDE8E0;border:1px solid transparent;transition:all .18s;position:relative;flex-direction:column;gap:2px}
+.cday:hover:not(.past):not(.empty){background:#150F18;border-color:#261E2E}
+.cday.today{border-color:#9A5A14;color:#F0A842}
+.cday.sel{background:#D4802A;color:#080608;font-weight:700;border-color:#D4802A}
+.cday.past{color:#3D3030;cursor:not-allowed}
+.cday.empty{cursor:default}
+.cday-dot{width:3px;height:3px;border-radius:50%;background:#D4802A}
+.cday.sel .cday-dot{background:#080608}
+.time-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:20px}
+.tslot{padding:11px 4px;background:#0F0B10;border:1px solid #1D1622;border-radius:10px;text-align:center;font-size:11px;font-weight:500;cursor:pointer;transition:.2s;font-family:'DM Mono',monospace;color:#EDE8E0}
+.tslot:hover:not(.booked){border-color:#9A5A14;color:#D4802A}
+.tslot.sel{background:#D4802A;color:#080608;border-color:#D4802A;font-weight:700}
+.tslot.booked{color:#3D3030;cursor:not-allowed;text-decoration:line-through;opacity:.4}
+/* Summary */
+.sum-card{background:#0F0B10;border:1px solid #1D1622;border-radius:16px;overflow:hidden;margin-bottom:16px}
+.sum-header{padding:13px 18px;background:rgba(212,128,42,0.08);border-bottom:1px solid rgba(212,128,42,0.12)}
+.sum-header-title{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#9A5A14;font-family:'DM Mono',monospace}
+.sum-body{padding:0 18px}
+.sum-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #1D1622;font-size:13px}
+.sum-row:last-child{border-bottom:none;padding-top:16px}
+.sum-k{color:#A89888}
+.sum-v{font-weight:600;text-align:right;max-width:55%;color:#EDE8E0}
+.sum-total-v{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:#F0A842}
+/* Inputs */
+.inp-wrap{margin-bottom:14px}
+.inp-lbl{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#A89888;margin-bottom:8px;display:block;font-family:'DM Mono',monospace}
+.c-inp{width:100%;background:#0F0B10;border:1.5px solid #1D1622;border-radius:12px;padding:13px 16px;color:#EDE8E0;font-size:14px;font-family:'Outfit',sans-serif;outline:none;transition:.2s}
+.c-inp:focus{border-color:#D4802A}
+.c-inp::placeholder{color:#6A5A50}
+/* Buttons */
+.btn-p{width:100%;padding:16px;background:linear-gradient(135deg,#9A5A14,#D4802A);border:none;border-radius:14px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;color:#080608;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:8px}
+.btn-p:hover{transform:translateY(-1px);box-shadow:0 8px 30px rgba(212,128,42,.2)}
+.btn-p:active{transform:scale(.98)}
+.btn-p[data-disabled]{opacity:.3;pointer-events:none}
+.btn-g{width:100%;padding:14px;background:transparent;border:1.5px solid #1D1622;border-radius:12px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;color:#A89888;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;gap:6px}
+.btn-g:hover{border-color:#9A5A14;color:#D4802A}
+.btn-row{display:flex;gap:8px}
+.btn-row .btn-g{flex:1}
+.btn-row .btn-p{flex:2;margin-bottom:0}
+/* History */
+.hist-card{background:#0F0B10;border:1px solid #1D1622;border-radius:16px;padding:17px;margin-bottom:10px;transition:.2s;position:relative;overflow:hidden}
+.hist-card::before{content:'';position:absolute;top:0;left:0;bottom:0;width:3px;border-radius:3px 0 0 3px}
+.hist-card.pending::before{background:#D4802A}
+.hist-card.done::before{background:#4ECDC4}
+.hist-card.cancel::before{background:#E8726A}
+.hist-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.hist-date{font-size:14px;font-weight:600;color:#EDE8E0}
+.hist-time{font-size:10px;color:#6A5A50;font-family:'DM Mono',monospace;margin-top:2px}
+.hbadge{display:inline-flex;align-items:center;padding:4px 10px;border-radius:20px;font-size:10px;font-weight:700;font-family:'DM Mono',monospace}
+.hbadge.pending{background:rgba(212,128,42,.1);color:#F0A842;border:1px solid rgba(212,128,42,.2)}
+.hbadge.done{background:rgba(78,205,196,.08);color:#4ECDC4;border:1px solid rgba(78,205,196,.2)}
+.hbadge.cancel{background:rgba(232,114,106,.08);color:#E8726A;border:1px solid rgba(232,114,106,.2)}
+.hist-svc{font-size:12px;color:#A89888;line-height:1.5;margin-bottom:12px}
+.hist-btm{display:flex;justify-content:space-between;align-items:center}
+.hist-barber{display:flex;align-items:center;gap:7px;font-size:12px;color:#6A5A50}
+.hb-dot{width:20px;height:20px;border-radius:50%;background:rgba(212,128,42,.1);border:1px solid rgba(212,128,42,.2);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:9px;font-weight:700;color:#F0A842}
+.hist-price{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#F0A842}
+/* Profile */
+.ph-top{background:linear-gradient(135deg,#0F0B10,#150F18);border:1px solid #1D1622;border-radius:22px;padding:28px 22px;text-align:center;margin-bottom:16px;position:relative;overflow:hidden}
+.ph-ava{width:76px;height:76px;border-radius:50%;background:linear-gradient(135deg,#9A5A14,#D4802A);margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:#080608}
+.ph-name{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:#EDE8E0;margin-bottom:4px}
+.ph-tag{font-size:11px;color:#6A5A50;letter-spacing:1px}
+.ph-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#1D1622;border-radius:14px;overflow:hidden;margin-top:18px}
+.ph-stat{background:#150F18;padding:14px 8px;text-align:center}
+.ph-sval{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#F0A842}
+.ph-slbl{font-size:8px;color:#6A5A50;letter-spacing:1px;text-transform:uppercase;margin-top:3px}
+.c-info-card{background:#0F0B10;border:1px solid #1D1622;border-radius:16px;padding:20px;margin-bottom:12px}
+.c-info-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid #1D1622;font-size:13px}
+.c-info-row:last-child{border-bottom:none}
+.c-info-k{color:#A89888}
+.c-info-v{font-weight:500;font-family:'DM Mono',monospace;font-size:11px;color:#EDE8E0}
+/* Empty state */
+.c-empty{text-align:center;padding:60px 20px;color:#6A5A50}
+.c-empty-icon{font-size:44px;margin-bottom:16px;opacity:.25}
+.c-empty-text{font-size:13px;line-height:1.7}
+
+/* ============================================================
+   ADMIN PANEL STYLES
+   ============================================================ */
+#admin-app{display:none;background:#0D0D0F;min-height:100vh;color:#E8E8F0}
+#admin-app.show{display:flex}
+.a-sidebar{width:220px;min-height:100vh;background:#141416;border-right:1px solid #2A2A32;display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;transition:transform .3s}
+.a-sidebar.hidden-mobile{transform:translateX(-100%)}
+.a-sb-brand{padding:24px 20px;border-bottom:1px solid #2A2A32}
+.a-sb-logo{display:flex;align-items:center;gap:10px}
+.a-sb-icon{width:36px;height:36px;background:#F0B429;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#0D0D0F;flex-shrink:0}
+.a-sb-title{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:#F0B429}
+.a-sb-sub{font-size:9px;color:#606078;letter-spacing:1px;margin-top:1px}
+.a-sb-nav{flex:1;padding:16px 10px;overflow-y:auto}
+.a-sb-sec{font-size:9px;font-weight:700;letter-spacing:2px;color:#606078;padding:0 10px;margin-bottom:6px;margin-top:16px;text-transform:uppercase;font-family:'JetBrains Mono',monospace}
+.a-sb-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;cursor:pointer;transition:.2s;font-size:13px;font-weight:500;color:#9090A8;margin-bottom:2px;border:1px solid transparent}
+.a-sb-item svg{width:16px;height:16px;stroke-width:1.8;flex-shrink:0;opacity:.7;transition:.2s}
+.a-sb-item:hover{background:#1A1A1E;color:#E8E8F0;border-color:#2A2A32}
+.a-sb-item:hover svg{opacity:1}
+.a-sb-item.active{background:rgba(240,180,41,.08);color:#F0B429;border-color:rgba(240,180,41,.15)}
+.a-sb-item.active svg{opacity:1;stroke:#F0B429}
+.a-sb-badge{margin-left:auto;background:#F0B429;color:#0D0D0F;font-size:10px;font-weight:700;padding:2px 6px;border-radius:20px;font-family:'JetBrains Mono',monospace}
+.a-sb-footer{padding:14px;border-top:1px solid #2A2A32}
+.a-sb-user{display:flex;align-items:center;gap:10px}
+.a-sb-ava{width:32px;height:32px;background:linear-gradient(135deg,#C8920A,#F0B429);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:16px;color:#0D0D0F;flex-shrink:0}
+.a-sb-uname{font-size:13px;font-weight:600;color:#E8E8F0}
+.a-sb-urole{font-size:10px;color:#606078}
+.a-main{margin-left:220px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+.a-topbar{background:#141416;border-bottom:1px solid #2A2A32;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.a-topbar-left{display:flex;align-items:center;gap:14px}
+.a-page-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:#E8E8F0}
+.a-page-sub{font-size:11px;color:#606078;font-family:'JetBrains Mono',monospace}
+.a-topbar-right{display:flex;align-items:center;gap:8px}
+.a-btn{padding:9px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:.2s;border:none;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:6px}
+.a-btn-ghost{background:transparent;border:1.5px solid #353540;color:#9090A8}
+.a-btn-ghost:hover{border-color:#F0B429;color:#F0B429}
+.a-btn-primary{background:#F0B429;color:#0D0D0F;font-weight:700}
+.a-btn-primary:hover{background:#FFD166;transform:translateY(-1px)}
+.a-content{flex:1;padding:24px}
+.a-view{display:none;animation:fadeUp .3s ease}
+.a-view.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+/* Admin stat cards */
+.a-stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.a-stat{background:#141416;border:1px solid #2A2A32;border-radius:12px;padding:18px;position:relative;overflow:hidden;transition:.2s}
+.a-stat:hover{border-color:#353540;transform:translateY(-2px)}
+.a-stat::before{content:'';position:absolute;top:0;right:0;width:70px;height:70px;border-radius:50%;opacity:.06}
+.a-stat.gold::before{background:#F0B429}
+.a-stat.green::before{background:#06D6A0}
+.a-stat.red::before{background:#EF4565}
+.a-stat.blue::before{background:#4CC9F0}
+.a-sc-label{font-size:9px;font-weight:700;letter-spacing:1.5px;color:#606078;text-transform:uppercase;font-family:'JetBrains Mono',monospace;margin-bottom:8px}
+.a-sc-val{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:1px;line-height:1;margin-bottom:4px}
+.a-stat.gold .a-sc-val{color:#F0B429}
+.a-stat.green .a-sc-val{color:#06D6A0}
+.a-stat.red .a-sc-val{color:#EF4565}
+.a-stat.blue .a-sc-val{color:#4CC9F0}
+.a-sc-sub{font-size:11px;color:#606078}
+/* Table card */
+.a-table-card{background:#141416;border:1px solid #2A2A32;border-radius:12px;overflow:hidden;margin-bottom:18px}
+.a-table-head{padding:16px 20px;border-bottom:1px solid #2A2A32;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.a-th-title{font-size:13px;font-weight:700;color:#E8E8F0}
+.a-search{display:flex;align-items:center;gap:7px;background:#1A1A1E;border:1px solid #2A2A32;border-radius:8px;padding:8px 12px;flex:1;max-width:220px}
+.a-search svg{color:#606078;flex-shrink:0;width:13px;height:13px}
+.a-search input{background:none;border:none;outline:none;color:#E8E8F0;font-size:12px;font-family:'DM Sans',sans-serif;width:100%}
+.a-search input::placeholder{color:#606078}
+table{width:100%;border-collapse:collapse}
+thead th{text-align:left;padding:11px 20px;font-size:9px;font-weight:700;letter-spacing:1.5px;color:#606078;text-transform:uppercase;font-family:'JetBrains Mono',monospace;background:#1A1A1E;border-bottom:1px solid #2A2A32}
+tbody tr{border-bottom:1px solid #2A2A32;transition:background .15s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:#1A1A1E}
+td{padding:13px 20px;font-size:13px;vertical-align:middle;color:#E8E8F0}
+.a-td-name{display:flex;align-items:center;gap:9px;font-weight:600}
+.a-td-ava{width:32px;height:32px;border-radius:8px;background:rgba(240,180,41,.08);border:1px solid rgba(240,180,41,.15);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:15px;color:#F0B429;flex-shrink:0;overflow:hidden}
+.a-td-ava img{width:100%;height:100%;object-fit:cover}
+.a-badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.a-badge-green{background:rgba(6,214,160,.08);color:#06D6A0;border:1px solid rgba(6,214,160,.2)}
+.a-badge-red{background:rgba(239,69,101,.08);color:#EF4565;border:1px solid rgba(239,69,101,.2)}
+.a-badge-gold{background:rgba(240,180,41,.08);color:#F0B429;border:1px solid rgba(240,180,41,.2)}
+.a-badge-blue{background:rgba(76,201,240,.08);color:#4CC9F0;border:1px solid rgba(76,201,240,.2)}
+.a-td-actions{display:flex;gap:5px}
+.a-act-btn{width:30px;height:30px;border-radius:7px;border:1px solid #2A2A32;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#9090A8;transition:.2s}
+.a-act-btn:hover.edit{border-color:#4CC9F0;color:#4CC9F0;background:rgba(76,201,240,.08)}
+.a-act-btn:hover.del{border-color:#EF4565;color:#EF4565;background:rgba(239,69,101,.08)}
+.a-act-btn:hover.view-btn{border-color:#F0B429;color:#F0B429;background:rgba(240,180,41,.08)}
+/* Barber grid admin */
+.a-barber-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
+.a-bmc{background:#141416;border:1px solid #2A2A32;border-radius:12px;padding:18px;text-align:center;position:relative;transition:.2s}
+.a-bmc:hover{border-color:#353540}
+.a-bmc-ava{width:58px;height:58px;border-radius:50%;background:rgba(240,180,41,.08);border:2px solid rgba(240,180,41,.2);margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:24px;color:#F0B429;overflow:hidden}
+.a-bmc-ava img{width:100%;height:100%;object-fit:cover}
+.a-bmc-name{font-size:14px;font-weight:700;color:#E8E8F0;margin-bottom:2px}
+.a-bmc-role{font-size:10px;color:#F0B429;margin-bottom:8px;font-family:'JetBrains Mono',monospace}
+.a-bmc-stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#2A2A32;border-radius:8px;overflow:hidden;margin-top:12px}
+.a-bmc-stat{background:#1A1A1E;padding:9px;text-align:center}
+.a-bmc-sval{font-family:'Bebas Neue',sans-serif;font-size:16px;color:#FFD166}
+.a-bmc-slbl{font-size:9px;color:#606078;font-family:'JetBrains Mono',monospace}
+.a-bmc-actions{display:flex;gap:5px;margin-top:10px}
+.a-bmc-actions .a-act-btn{flex:1;width:auto}
+.a-bmc-toggle{position:absolute;top:12px;right:12px}
+.a-toggle{width:34px;height:18px;background:#2A2A32;border-radius:9px;cursor:pointer;position:relative;transition:.3s;border:1px solid #353540}
+.a-toggle::after{content:'';position:absolute;width:12px;height:12px;background:#606078;border-radius:50%;top:2px;left:2px;transition:.3s}
+.a-toggle.on{background:rgba(6,214,160,.15);border-color:rgba(6,214,160,.3)}
+.a-toggle.on::after{background:#06D6A0;left:18px}
+/* Form */
+.a-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.a-form-group{margin-bottom:14px}
+.a-form-group.full{grid-column:1/-1}
+.a-form-label{font-size:10px;font-weight:700;letter-spacing:.8px;color:#9090A8;text-transform:uppercase;margin-bottom:7px;display:block;font-family:'JetBrains Mono',monospace}
+.a-form-input{width:100%;background:#1A1A1E;border:1.5px solid #2A2A32;border-radius:8px;padding:11px 13px;color:#E8E8F0;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;transition:.2s}
+.a-form-input:focus{border-color:#F0B429}
+.a-form-input::placeholder{color:#606078}
+select.a-form-input option{background:#1A1A1E}
+/* Modal */
+.a-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.25s;backdrop-filter:blur(4px)}
+.a-modal-overlay.open{opacity:1;pointer-events:all}
+.a-modal{background:#141416;border:1px solid #353540;border-radius:16px;padding:26px;width:100%;max-width:460px;transform:scale(.94) translateY(16px);transition:.3s;max-height:90vh;overflow-y:auto}
+.a-modal-overlay.open .a-modal{transform:scale(1) translateY(0)}
+.a-modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+.a-modal-title{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:#F0B429}
+.a-modal-close{width:30px;height:30px;background:#1A1A1E;border:1px solid #2A2A32;border-radius:7px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#9090A8;transition:.2s;font-size:14px}
+.a-modal-close:hover{border-color:#EF4565;color:#EF4565}
+.a-modal-btns{display:flex;gap:8px;margin-top:18px}
+.a-modal-btns .a-btn{flex:1;justify-content:center;padding:11px}
+/* Activity feed */
+.a-activity{padding:0 20px}
+.a-act-item{display:flex;align-items:flex-start;gap:10px;padding:12px 0;border-bottom:1px solid #2A2A32}
+.a-act-item:last-child{border-bottom:none}
+.a-act-dot{width:7px;height:7px;border-radius:50%;margin-top:5px;flex-shrink:0}
+.a-act-dot.gold{background:#F0B429}
+.a-act-dot.green{background:#06D6A0}
+.a-act-dot.red{background:#EF4565}
+.a-act-text{flex:1;font-size:12px;line-height:1.5;color:#E8E8F0}
+.a-act-time{font-size:10px;color:#606078;font-family:'JetBrains Mono',monospace;margin-top:2px}
+/* Chart */
+.a-chart-area{height:160px;display:flex;align-items:flex-end;gap:5px;padding:14px 20px 0}
+.a-chart-bar{flex:1;border-radius:4px 4px 0 0;background:rgba(240,180,41,.08);border:1px solid rgba(240,180,41,.15);transition:.3s;cursor:pointer;position:relative}
+.a-chart-bar:hover{background:rgba(240,180,41,.2)}
+.a-chart-bar .a-bar-val{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);font-size:9px;color:#F0B429;padding-bottom:3px;font-family:'JetBrains Mono',monospace;white-space:nowrap;opacity:0;transition:.2s}
+.a-chart-bar:hover .a-bar-val{opacity:1}
+.a-chart-labels{display:flex;gap:5px;padding:5px 20px 14px;border-top:1px solid #2A2A32}
+.a-chart-lbl{flex:1;text-align:center;font-size:9px;color:#606078;font-family:'JetBrains Mono',monospace}
+/* Grid layouts */
+.a-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+.a-grid-3{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:18px}
+/* Scrollbar */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:#0D0D0F}
+::-webkit-scrollbar-thumb{background:#2A2A32;border-radius:10px}
+/* Toast */
+.toast-wrap{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:9999;pointer-events:none}
+.toast{background:#1A1A1E;border:1px solid #353540;color:#E8E8F0;padding:12px 22px;border-radius:30px;font-size:13px;font-weight:600;opacity:0;transform:translateY(10px);transition:.3s;white-space:nowrap;display:flex;align-items:center;gap:8px}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.ok{border-color:rgba(6,214,160,.3);color:#06D6A0}
+.toast.err{border-color:rgba(239,69,101,.3);color:#EF4565}
+@media(max-width:768px){
+  .a-sidebar{transform:translateX(-100%)}
+  .a-sidebar.mob-open{transform:translateX(0)}
+  .a-main{margin-left:0}
+  .a-stats-grid{grid-template-columns:1fr 1fr}
+  .a-barber-grid{grid-template-columns:1fr 1fr}
+  .a-grid-2,.a-grid-3{grid-template-columns:1fr}
+  .a-form-grid{grid-template-columns:1fr}
+  .a-content{padding:12px;padding-bottom:80px}
+  .a-topbar{padding:10px 14px}
+  .a-page-title{font-size:16px}
+  /* Hide sidebar on mobile, show bottom nav instead */
+  #a-bottom-nav{display:flex !important}
+  table{font-size:11px}
+  thead th{padding:8px 10px;font-size:8px}
+  td{padding:8px 10px}
+  .a-modal{margin:12px;max-width:calc(100vw - 24px)}
+  .a-stats-grid .a-sc-val{font-size:24px}
+}
+/* Admin bottom nav for mobile */
+#a-bottom-nav{
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;
+  background:#141416;border-top:1px solid #2A2A32;
+  z-index:200;padding:6px 0 env(safe-area-inset-bottom, 6px);
+}
+.a-bn-items{display:flex;justify-content:space-around;align-items:center}
+.a-bn-item{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 12px;cursor:pointer;border-radius:10px;transition:.2s;position:relative;border:none;background:transparent;color:#606078;font-family:'DM Sans',sans-serif;min-width:52px}
+.a-bn-item svg{width:20px;height:20px;stroke-width:1.8;transition:.2s}
+.a-bn-item span{font-size:9px;font-weight:600;letter-spacing:.3px}
+.a-bn-item.active{color:#F0B429}
+.a-bn-item.active svg{stroke:#F0B429}
+.a-bn-badge{position:absolute;top:4px;right:8px;min-width:16px;height:16px;border-radius:8px;background:#F0B429;color:#0D0D0F;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;padding:0 4px}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     LOADING SCREEN
+     ============================================================ -->
+<div id="loading-screen">
+  <div class="ld-ring"><div class="ld-scissors">✂</div></div>
+  <div class="ld-title">TERMIZ BARBER</div>
+  <div class="ld-bar"><div class="ld-progress"></div></div>
+  <div class="ld-status" id="ld-status">Tekshirilmoqda...</div>
+</div>
+
+<!-- ============================================================
+     ERROR SCREEN
+     ============================================================ -->
+<div id="error-screen">
+  <div class="err-icon">⚠️</div>
+  <div class="err-title">Xatolik yuz berdi</div>
+  <div class="err-msg" id="err-msg">Telegram orqali oching yoki qayta urinib ko'ring.</div>
+</div>
+
+<!-- ============================================================
+     CLIENT APP
+     ============================================================ -->
+<div id="client-app">
+<div class="c-ambient"></div>
+<div class="c-app">
+  <div class="c-header">
+    <div class="c-header-inner">
+      <div class="c-header-top">
+        <div class="c-brand">
+          <div class="c-gem">✂</div>
+          <div>
+            <div class="c-wordmark">TERMIZ BARBER</div>
+            <div class="c-sub">Premium · Termiz</div>
+          </div>
+        </div>
+        <div class="c-hactions">
+          <div class="c-hbtn" onclick="cShowNotif()">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+            <div class="c-pip" id="c-pip" style="display:none"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- HOME -->
+  <div class="c-panel active" id="cp-home">
+    <div class="c-wrap">
+      <div class="hero-band">
+        <div class="hero-img-wrap">
+          <div class="hero-deco"></div>
+          <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(212,128,42,0.04),rgba(78,205,196,0.02))"></div>
+          <div class="hero-gradient"></div>
+          <div class="hero-img-content">
+            <div class="hero-open-badge">Bugun ochiq</div>
+            <div class="hero-title">Salom, <em id="c-hero-name">Do'stim!</em></div>
+          </div>
+        </div>
+      </div>
+      <div class="sr">
+        <div class="sr-item"><div class="sr-val">4.9</div><div class="sr-lbl">Reyting</div></div>
+        <div class="sr-item"><div class="sr-val">1.2K</div><div class="sr-lbl">Mijoz</div></div>
+        <div class="sr-item"><div class="sr-val" id="c-mcount">3</div><div class="sr-lbl">Master</div></div>
+      </div>
+      <div class="sect">
+        <div class="sect-row">
+          <div class="sect-lbl">Masterlar</div>
+          <div class="sect-more" onclick="cGoPanel('book',null)">Barchasi →</div>
+        </div>
+        <div class="b-row" id="c-home-barbers"><div class="c-empty-text" style="padding:20px;color:#6A5A50">Yuklanmoqda...</div></div>
+      </div>
+      <div class="sect">
+        <div class="sect-row"><div class="sect-lbl">Xizmatlar</div></div>
+        <div id="c-home-svcs"></div>
+      </div>
+      <button class="c-cta" onclick="cGoPanel('book',null)">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Tezkor navbat olish
+      </button>
+    </div>
+  </div>
+
+  <!-- BOOKING -->
+  <div class="c-panel" id="cp-book">
+    <div class="c-wrap">
+      <!-- step 1 -->
+      <div id="cs1">
+        <div class="steps">
+          <div class="step-dot active">1</div><div class="step-line"></div>
+          <div class="step-dot">2</div><div class="step-line"></div>
+          <div class="step-dot">3</div><div class="step-line"></div>
+          <div class="step-dot">4</div>
+        </div>
+        <div class="bk-lbl">Master tanlang</div>
+        <div class="bk-grid" id="cs-barbers"></div>
+        <button class="btn-p" id="cs-btn1" data-disabled onclick="cGoStep(2)">Davom etish →</button>
+      </div>
+      <!-- step 2 -->
+      <div id="cs2" style="display:none">
+        <div class="steps">
+          <div class="step-dot done">✓</div><div class="step-line done"></div>
+          <div class="step-dot active">2</div><div class="step-line"></div>
+          <div class="step-dot">3</div><div class="step-line"></div>
+          <div class="step-dot">4</div>
+        </div>
+        <div class="bk-lbl">Xizmat tanlang</div>
+        <div id="cs-svcs"></div>
+        <div class="btn-row">
+          <button class="btn-g" onclick="cGoStep(1)">← Orqaga</button>
+          <button class="btn-p" id="cs-btn2" data-disabled onclick="cGoStep(3)">Davom →</button>
+        </div>
+      </div>
+      <!-- step 3 -->
+      <div id="cs3" style="display:none">
+        <div class="steps">
+          <div class="step-dot done">✓</div><div class="step-line done"></div>
+          <div class="step-dot done">✓</div><div class="step-line done"></div>
+          <div class="step-dot active">3</div><div class="step-line"></div>
+          <div class="step-dot">4</div>
+        </div>
+        <div class="bk-lbl">Sana tanlang</div>
+        <div class="cal-box">
+          <div class="cal-head">
+            <div class="cal-nav-btn" onclick="cChgMonth(-1)">‹</div>
+            <div class="cal-month-lbl" id="c-cal-lbl"></div>
+            <div class="cal-nav-btn" onclick="cChgMonth(1)">›</div>
+          </div>
+          <div class="cal-dh-row">
+            <div class="cal-dh">Du</div><div class="cal-dh">Se</div><div class="cal-dh">Ch</div>
+            <div class="cal-dh">Pa</div><div class="cal-dh">Ju</div><div class="cal-dh">Sh</div><div class="cal-dh">Ya</div>
+          </div>
+          <div class="cal-days" id="c-cal-days"></div>
+        </div>
+        <div class="bk-lbl">Vaqt tanlang</div>
+        <div class="time-grid" id="c-time-slots"></div>
+        <div class="btn-row">
+          <button class="btn-g" onclick="cGoStep(2)">← Orqaga</button>
+          <button class="btn-p" id="cs-btn3" data-disabled onclick="cGoStep(4)">Davom →</button>
+        </div>
+      </div>
+      <!-- step 4 -->
+      <div id="cs4" style="display:none">
+        <div class="steps">
+          <div class="step-dot done">✓</div><div class="step-line done"></div>
+          <div class="step-dot done">✓</div><div class="step-line done"></div>
+          <div class="step-dot done">✓</div><div class="step-line done"></div>
+          <div class="step-dot active">4</div>
+        </div>
+        <div class="bk-lbl">Buyurtma xulosasi</div>
+        <div class="sum-card">
+          <div class="sum-header"><div class="sum-header-title">Buyurtma tafsiloti</div></div>
+          <div class="sum-body">
+            <div class="sum-row"><span class="sum-k">Master</span><span class="sum-v" id="cs-sm-b">—</span></div>
+            <div class="sum-row"><span class="sum-k">Xizmatlar</span><span class="sum-v" id="cs-sm-s">—</span></div>
+            <div class="sum-row"><span class="sum-k">Sana</span><span class="sum-v" id="cs-sm-d">—</span></div>
+            <div class="sum-row"><span class="sum-k">Vaqt</span><span class="sum-v" id="cs-sm-t">—</span></div>
+            <div class="sum-row"><span class="sum-k">Davomiylik</span><span class="sum-v" id="cs-sm-dur">—</span></div>
+            <div class="sum-row"><span class="sum-k" style="font-size:14px;font-weight:600;color:#EDE8E0">Jami</span><span class="sum-total-v" id="cs-sm-total">—</span></div>
+          </div>
+        </div>
+        <div class="inp-wrap">
+          <label class="inp-lbl">Telefon raqam</label>
+          <input class="c-inp" type="tel" id="c-ph-inp" placeholder="+998 XX XXX XX XX">
+        </div>
+        <div class="inp-wrap">
+          <label class="inp-lbl">Izoh (ixtiyoriy)</label>
+          <input class="c-inp" type="text" id="c-note-inp" placeholder="Maxsus talablar...">
+        </div>
+        <button class="btn-p" onclick="cConfirmBk()">✓ Navbatni tasdiqlash</button>
+        <button class="btn-g" onclick="cGoStep(3)">← Orqaga</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="c-panel" id="cp-history">
+    <div class="c-wrap">
+      <div class="sect-row" style="margin-bottom:16px">
+        <div class="sect-lbl">Navbatlarim</div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:#6A5A50" id="c-hist-cnt">0 ta</div>
+      </div>
+      <div id="c-hist-list"><div class="c-empty"><div class="c-empty-icon">⏳</div><div class="c-empty-text">Yuklanmoqda...</div></div></div>
+    </div>
+  </div>
+
+  <!-- PROFILE -->
+  <div class="c-panel" id="cp-profile">
+    <div class="c-wrap">
+      <div class="ph-top">
+        <div class="ph-ava" id="c-ph-letter">M</div>
+        <div class="ph-name" id="c-ph-name">Mehmon</div>
+        <div class="ph-tag">Termiz Barber mijozi</div>
+        <div class="ph-stats">
+          <div class="ph-stat"><div class="ph-sval" id="c-ph-visits">0</div><div class="ph-slbl">Tashrif</div></div>
+          <div class="ph-stat"><div class="ph-sval" id="c-ph-spent">0</div><div class="ph-slbl">Xarajat</div></div>
+          <div class="ph-stat"><div class="ph-sval" id="c-ph-fav">—</div><div class="ph-slbl">Sevimli</div></div>
+        </div>
+      </div>
+      <div class="c-info-card">
+        <div class="c-info-row"><span class="c-info-k">Ish vaqti</span><span class="c-info-v">09:00 – 20:00</span></div>
+        <div class="c-info-row"><span class="c-info-k">Dam olish</span><span class="c-info-v">Yakshanba</span></div>
+        <div class="c-info-row"><span class="c-info-k">Manzil</span><span class="c-info-v" id="c-pr-addr">Termiz sh.</span></div>
+      </div>
+      <div class="c-info-card">
+        <div class="c-info-row"><span class="c-info-k">Faol masterlar</span><span class="c-info-v" id="c-pr-mast">—</span></div>
+        <div class="c-info-row"><span class="c-info-k">Xizmatlar soni</span><span class="c-info-v" id="c-pr-svcs">—</span></div>
+        <div class="c-info-row"><span class="c-info-k">Versiya</span><span class="c-info-v">v2.0 · Supabase</span></div>
+      </div>
+      <button class="btn-p" onclick="cGoPanel('book',null)">+ Yangi navbat olish</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- Client fixed bottom navigation -->
+<div id="c-bottom-nav" style="display:none">
+  <div class="c-bn-items">
+    <button class="c-nt active" id="cn-home" onclick="cGoPanel('home',this)">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+      Bosh
+    </button>
+    <button class="c-nt" id="cn-book" onclick="cGoPanel('book',this)">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Navbat
+    </button>
+    <button class="c-nt" id="cn-history" onclick="cGoPanel('history',this)">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+      Tarix
+    </button>
+    <button class="c-nt" id="cn-profile" onclick="cGoPanel('profile',this)">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profil
+    </button>
+  </div>
+</div>
+
+<!-- ============================================================
+     ADMIN APP
+     ============================================================ -->
+<div id="admin-app">
+  <div class="a-sidebar" id="a-sidebar">
+    <div class="a-sb-brand">
+      <div class="a-sb-logo">
+        <div class="a-sb-icon">✂</div>
+        <div>
+          <div class="a-sb-title">TERMIZ BARBER</div>
+          <div class="a-sb-sub">ADMIN · v2.0</div>
+        </div>
+      </div>
+    </div>
+    <div class="a-sb-nav">
+      <div class="a-sb-sec">Asosiy</div>
+      <div class="a-sb-item active" onclick="aGoView('dashboard',this)">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </div>
+      <div class="a-sb-item" onclick="aGoView('bookings',this)">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Navbatlar
+        <span class="a-sb-badge" id="a-nav-badge">0</span>
+      </div>
+      <div class="a-sb-sec">Boshqaruv</div>
+      <div class="a-sb-item" onclick="aGoView('barbers',this)">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        Masterlar
+      </div>
+      <div class="a-sb-item" onclick="aGoView('services',this)">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
+        Xizmatlar
+      </div>
+      <div class="a-sb-item" onclick="aGoView('clients',this)">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Mijozlar
+      </div>
+      <div class="a-sb-sec">Sozlamalar</div>
+      <div class="a-sb-item" onclick="aGoView('settings',this)">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        Sozlamalar
+      </div>
+      <div class="a-sb-item" onclick="aGoView('admins',this)">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Adminlar
+      </div>
+    </div>
+    <div class="a-sb-footer">
+      <div class="a-sb-user">
+        <div class="a-sb-ava" id="a-sb-letter">A</div>
+        <div>
+          <div class="a-sb-uname" id="a-sb-uname">Admin</div>
+          <div class="a-sb-urole">Super Admin · TG</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="a-main">
+    <div class="a-topbar">
+      <div class="a-topbar-left">
+        <button class="a-btn a-btn-ghost" onclick="aToggleSidebar()" id="a-menu-btn" style="display:none">☰</button>
+        <div>
+          <div class="a-page-title" id="a-page-title">DASHBOARD</div>
+          <div class="a-page-sub" id="a-page-sub">Umumiy ko'rinish</div>
+        </div>
+      </div>
+      <div class="a-topbar-right">
+        <button class="a-btn a-btn-primary" id="a-action-btn" style="display:none" onclick="aTopAction()"></button>
+      </div>
+    </div>
+
+    <div class="a-content">
+
+      <!-- DASHBOARD -->
+      <div class="a-view active" id="av-dashboard">
+        <div class="a-stats-grid">
+          <div class="a-stat gold"><div class="a-sc-label">Jami tushum</div><div class="a-sc-val" id="a-rev">0</div><div class="a-sc-sub">Bajarilgan</div></div>
+          <div class="a-stat green"><div class="a-sc-label">Jami navbatlar</div><div class="a-sc-val" id="a-total">0</div><div class="a-sc-sub">Barcha vaqt</div></div>
+          <div class="a-stat red"><div class="a-sc-label">Kutilayotgan</div><div class="a-sc-val" id="a-pending">0</div><div class="a-sc-sub">Tasdiqlash kerak</div></div>
+          <div class="a-stat blue"><div class="a-sc-label">Mijozlar</div><div class="a-sc-val" id="a-clients">0</div><div class="a-sc-sub">Unique</div></div>
+        </div>
+        <div class="a-grid-3">
+          <div class="a-table-card">
+            <div class="a-table-head"><div class="a-th-title">Haftalik statistika</div></div>
+            <div class="a-chart-area" id="a-chart-bars"></div>
+            <div class="a-chart-labels" id="a-chart-labels"></div>
+          </div>
+          <div class="a-table-card">
+            <div class="a-table-head"><div class="a-th-title">Faoliyat</div></div>
+            <div class="a-activity" id="a-activity"></div>
+          </div>
+        </div>
+        <div class="a-table-card">
+          <div class="a-table-head">
+            <div class="a-th-title">Oxirgi navbatlar</div>
+            <button class="a-btn a-btn-ghost" onclick="aGoView('bookings',null)" style="font-size:12px">Barchasi →</button>
+          </div>
+          <table><thead><tr><th>#</th><th>Mijoz</th><th>Master</th><th>Xizmat</th><th>Sana</th><th>Summa</th><th>Status</th><th>Amal</th></tr></thead>
+          <tbody id="a-dash-bks"></tbody></table>
+        </div>
+      </div>
+
+      <!-- BOOKINGS -->
+      <div class="a-view" id="av-bookings">
+        <div class="a-table-card">
+          <div class="a-table-head">
+            <div class="a-th-title">Barcha navbatlar</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+              <select class="a-form-input" id="a-bk-filter" onchange="aRenderBookings()" style="width:auto;padding:8px 10px;font-size:12px">
+                <option value="">Barcha status</option>
+                <option value="pending">Kutilayotgan</option>
+                <option value="done">Bajarildi</option>
+                <option value="cancel">Bekor</option>
+              </select>
+              <div class="a-search">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" placeholder="Qidirish..." id="a-bk-search" oninput="aRenderBookings()">
+              </div>
+            </div>
+          </div>
+          <table><thead><tr><th>#</th><th>Mijoz</th><th>Master</th><th>Xizmat</th><th>Sana/Vaqt</th><th>Summa</th><th>Status</th><th>Amal</th></tr></thead>
+          <tbody id="a-bks-tbody"></tbody></table>
+        </div>
+      </div>
+
+      <!-- BARBERS -->
+      <div class="a-view" id="av-barbers">
+        <div class="a-barber-grid" id="a-barbers-grid"></div>
+      </div>
+
+      <!-- SERVICES -->
+      <div class="a-view" id="av-services">
+        <div class="a-table-card">
+          <div class="a-table-head"><div class="a-th-title">Xizmatlar</div></div>
+          <table><thead><tr><th>Icon</th><th>Nomi</th><th>Narxi</th><th>Davomiyligi</th><th>Tavsif</th><th>Amal</th></tr></thead>
+          <tbody id="a-svcs-tbody"></tbody></table>
+        </div>
+      </div>
+
+      <!-- CLIENTS -->
+      <div class="a-view" id="av-clients">
+        <div class="a-table-card">
+          <div class="a-table-head">
+            <div class="a-th-title">Mijozlar bazasi</div>
+            <div class="a-search">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" placeholder="Telefon yoki ism..." id="a-cl-search" oninput="aRenderClients()">
+            </div>
+          </div>
+          <table><thead><tr><th>Telegram</th><th>Telefon</th><th>Tashrif</th><th>Xarajat</th><th>Oxirgi tashrif</th><th>Sevimli master</th></tr></thead>
+          <tbody id="a-cl-tbody"></tbody></table>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="a-view" id="av-settings">
+        <div class="a-grid-2">
+          <div class="a-table-card" style="padding:22px">
+            <div class="a-th-title" style="margin-bottom:18px">Salon ma'lumotlari</div>
+            <div class="a-form-group"><label class="a-form-label">Salon nomi</label><input class="a-form-input" id="set-name" type="text"></div>
+            <div class="a-form-group"><label class="a-form-label">Manzil</label><input class="a-form-input" id="set-addr" type="text"></div>
+            <div class="a-form-group"><label class="a-form-label">Telefon</label><input class="a-form-input" id="set-phone" type="text"></div>
+            <button class="a-btn a-btn-primary" onclick="aSaveSettings()" style="width:100%;justify-content:center;padding:12px">Saqlash</button>
+          </div>
+          <div class="a-table-card" style="padding:22px">
+            <div class="a-th-title" style="margin-bottom:18px">Ish vaqti</div>
+            <div id="a-hours-form"></div>
+            <button class="a-btn a-btn-primary" onclick="aSaveHours()" style="width:100%;justify-content:center;padding:12px;margin-top:8px">Saqlash</button>
+          </div>
+        </div>
+        <div class="a-table-card" style="padding:22px">
+          <div class="a-th-title" style="margin-bottom:14px">Ma'lumotlar</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="a-btn a-btn-ghost" onclick="aExportData()">📥 JSON Export</button>
+            <button class="a-btn" style="background:rgba(239,69,101,.08);border:1px solid rgba(239,69,101,.2);color:#EF4565" onclick="aClearDone()">Bajarilganlarni tozalash</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADMINS -->
+      <div class="a-view" id="av-admins">
+        <div class="a-table-card">
+          <div class="a-table-head">
+            <div class="a-th-title">Admin ro'yxati</div>
+            <button class="a-btn a-btn-primary" onclick="aOpenAdminModal()">+ Admin qo'shish</button>
+          </div>
+          <table><thead><tr><th>Telegram ID</th><th>Ism</th><th>Qo'shilgan</th><th>Amal</th></tr></thead>
+          <tbody id="a-admins-tbody"></tbody></table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<!-- Barber Modal -->
+<div class="a-modal-overlay" id="m-barber">
+  <div class="a-modal">
+    <div class="a-modal-header">
+      <div class="a-modal-title" id="m-barber-title">MASTER QO'SHISH</div>
+      <button class="a-modal-close" onclick="aCloseModal('m-barber')">✕</button>
+    </div>
+    <input type="hidden" id="m-b-id">
+    <div class="a-form-grid">
+      <div class="a-form-group"><label class="a-form-label">Ism</label><input class="a-form-input" id="m-b-name" placeholder="Mirjalol"></div>
+      <div class="a-form-group"><label class="a-form-label">Lavozim</label><input class="a-form-input" id="m-b-role" placeholder="Top Barber"></div>
+      <div class="a-form-group"><label class="a-form-label">Reyting</label><input class="a-form-input" type="number" id="m-b-rating" placeholder="4.9" step="0.1" min="1" max="5"></div>
+      <div class="a-form-group"><label class="a-form-label">Sharhlar</label><input class="a-form-input" type="number" id="m-b-reviews" placeholder="340"></div>
+      <div class="a-form-group full"><label class="a-form-label">Telefon</label><input class="a-form-input" type="tel" id="m-b-phone" placeholder="+998 90 000 00 00"></div>
+      <div class="a-form-group full"><label class="a-form-label">Rasm URL</label><input class="a-form-input" id="m-b-avatar" placeholder="https://..."></div>
+      <div class="a-form-group full"><label class="a-form-label">Izoh</label><input class="a-form-input" id="m-b-note" placeholder="Master haqida..."></div>
+    </div>
+    <div class="a-modal-btns">
+      <button class="a-btn a-btn-ghost" onclick="aCloseModal('m-barber')">Bekor</button>
+      <button class="a-btn a-btn-primary" onclick="aSaveBarber()" style="flex:2">Saqlash</button>
+    </div>
+  </div>
+</div>
+
+<!-- Service Modal -->
+<div class="a-modal-overlay" id="m-service">
+  <div class="a-modal">
+    <div class="a-modal-header">
+      <div class="a-modal-title" id="m-svc-title">XIZMAT QO'SHISH</div>
+      <button class="a-modal-close" onclick="aCloseModal('m-service')">✕</button>
+    </div>
+    <input type="hidden" id="m-s-id">
+    <div class="a-form-grid">
+      <div class="a-form-group"><label class="a-form-label">Nomi</label><input class="a-form-input" id="m-s-name" placeholder="Soch olish"></div>
+      <div class="a-form-group"><label class="a-form-label">Icon</label><input class="a-form-input" id="m-s-icon" placeholder="✂️"></div>
+      <div class="a-form-group"><label class="a-form-label">Narxi (so'm)</label><input class="a-form-input" type="number" id="m-s-price" placeholder="60000"></div>
+      <div class="a-form-group"><label class="a-form-label">Davomiyligi (min)</label><input class="a-form-input" type="number" id="m-s-dur" placeholder="30"></div>
+      <div class="a-form-group full"><label class="a-form-label">Tavsif</label><input class="a-form-input" id="m-s-desc" placeholder="Qisqacha tavsif..."></div>
+    </div>
+    <div class="a-modal-btns">
+      <button class="a-btn a-btn-ghost" onclick="aCloseModal('m-service')">Bekor</button>
+      <button class="a-btn a-btn-primary" onclick="aSaveService()" style="flex:2">Saqlash</button>
+    </div>
+  </div>
+</div>
+
+<!-- Booking Detail Modal -->
+<div class="a-modal-overlay" id="m-booking">
+  <div class="a-modal">
+    <div class="a-modal-header">
+      <div class="a-modal-title">NAVBAT #<span id="m-bk-id"></span></div>
+      <button class="a-modal-close" onclick="aCloseModal('m-booking')">✕</button>
+    </div>
+    <div id="m-bk-content"></div>
+    <div class="a-modal-btns" id="m-bk-actions"></div>
+  </div>
+</div>
+
+<!-- Admin Modal -->
+<div class="a-modal-overlay" id="m-admin">
+  <div class="a-modal">
+    <div class="a-modal-header">
+      <div class="a-modal-title">ADMIN QO'SHISH</div>
+      <button class="a-modal-close" onclick="aCloseModal('m-admin')">✕</button>
+    </div>
+    <div class="a-form-group"><label class="a-form-label">Telegram ID</label><input class="a-form-input" id="m-adm-id" placeholder="123456789" type="number"></div>
+    <div class="a-form-group"><label class="a-form-label">Ism</label><input class="a-form-input" id="m-adm-name" placeholder="Sardor"></div>
+    <div class="a-modal-btns">
+      <button class="a-btn a-btn-ghost" onclick="aCloseModal('m-admin')">Bekor</button>
+      <button class="a-btn a-btn-primary" onclick="aSaveAdmin()" style="flex:2">Saqlash</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap"><div class="toast" id="toast"></div></div>
+
+<!-- Admin mobile bottom nav -->
+<div id="a-bottom-nav">
+  <div class="a-bn-items">
+    <button class="a-bn-item active" onclick="aGoViewMob('dashboard',this)">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span>Bosh</span>
+    </button>
+    <button class="a-bn-item" onclick="aGoViewMob('bookings',this)">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span>Navbat</span>
+      <div class="a-bn-badge" id="a-mob-badge" style="display:none">0</div>
+    </button>
+    <button class="a-bn-item" onclick="aGoViewMob('barbers',this)">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      <span>Master</span>
+    </button>
+    <button class="a-bn-item" onclick="aGoViewMob('services',this)">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
+      <span>Xizmat</span>
+    </button>
+    <button class="a-bn-item" onclick="aGoViewMob('settings',this)">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+      <span>Sozlama</span>
+    </button>
+  </div>
+</div>
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script>
+// ============================================================
+// CONFIG — REPLACE THESE AFTER CREATING SUPABASE PROJECT
+// ============================================================
+const SUPABASE_URL  = 'https://vezdgqyndfdafwcdrgfz.supabase.co';     // e.g. https://xxxx.supabase.co
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZlemRncXluZGZkYWZ3Y2RyZ2Z6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5MDgwMjYsImV4cCI6MjA5MzQ4NDAyNn0.k7XfxYOjHbdIVfpzJLhzvIcDUNRWHH-pLNjFIl5X22o'; // eyJhbGci...
+const ADMIN_IDS     = ['8536944196'];            // Admin telegram IDs
+const BOT_TOKEN     = '8669240949:AAESNLLcctbfYs55aR0dckNL7yqk7J5Ra-c';
+// ============================================================
+
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+const tg = window.Telegram?.WebApp;
+const MNs = ['Yanvar','Fevral','Mart','Aprel','May','Iyun','Iyul','Avgust','Sentyabr','Oktyabr','Noyabr','Dekabr'];
+
+// State
+let SB_DATA = { barbers:[], services:[], settings:{} };
+let TG_USER = null;
+let IS_ADMIN = false;
+let cSelB='', cSelSvcs=[], cSelTotal=0, cSelDur=0, cSelDate='', cSelTime='';
+let cCalY=2026, cCalM=4;
+
+// ============================================================
+// INIT
+// ============================================================
+window.addEventListener('load', async () => {
+  setLdStatus('Telegram tekshirilmoqda...');
+
+  if (!tg) {
+    // Dev mode — allow without Telegram
+    const devId = prompt('DEV MODE: Telegram ID kiriting (admin: 8536944196)', '123456');
+    if (!devId) { showError('Telegram WebApp orqali oching!'); return; }
+    TG_USER = { id: devId, first_name: 'Dev', username: 'dev' };
+  } else {
+    tg.ready();
+    tg.expand();
+    const u = tg.initDataUnsafe?.user;
+    if (!u) { showError('Foydalanuvchi ma\'lumotlari topilmadi. Telegram botdan qayta oching.'); return; }
+    TG_USER = { id: String(u.id), first_name: u.first_name || 'Mehmon', username: u.username || '' };
+  }
+
+  setLdStatus('Ma\'lumotlar yuklanmoqda...');
+
+  // Check if Supabase configured
+  if (SUPABASE_URL === 'YOUR_SUPABASE_URL') {
+    // Run in local mode without Supabase
+    setLdStatus('Lokal rejimda...');
+    await new Promise(r => setTimeout(r, 600));
+    IS_ADMIN = ADMIN_IDS.includes(String(TG_USER.id));
+    finishLoading();
+    return;
+  }
+
+  try {
+    // Load data from Supabase
+    const [barbersRes, servicesRes, settingsRes, adminsRes] = await Promise.all([
+      sb.from('barbers').select('*').eq('active', true).order('id'),
+      sb.from('services').select('*').eq('active', true).order('id'),
+      sb.from('settings').select('*').eq('id', 1).single(),
+      sb.from('admins').select('telegram_id')
+    ]);
+
+    SB_DATA.barbers = barbersRes.data || [];
+    SB_DATA.services = servicesRes.data || [];
+    SB_DATA.settings = settingsRes.data || {};
+
+    const adminIds = (adminsRes.data || []).map(a => a.telegram_id);
+    IS_ADMIN = adminIds.includes(String(TG_USER.id)) || ADMIN_IDS.includes(String(TG_USER.id));
+
+    setLdStatus('Tayyor!');
+    await new Promise(r => setTimeout(r, 400));
+  } catch(e) {
+    console.error('Supabase error:', e);
+    setLdStatus('Lokal rejimda ishlayapman...');
+    IS_ADMIN = ADMIN_IDS.includes(String(TG_USER.id));
+    await new Promise(r => setTimeout(r, 500));
+  }
+
+  finishLoading();
+});
+
+function setLdStatus(txt) {
+  document.getElementById('ld-status').textContent = txt;
+}
+
+function finishLoading() {
+  const ls = document.getElementById('loading-screen');
+  ls.classList.add('fade');
+  setTimeout(() => { ls.style.display = 'none'; }, 600);
+
+  if (IS_ADMIN) {
+    document.getElementById('admin-app').classList.add('show'); document.getElementById('c-bottom-nav').style.display='none';
+    aInit();
+  } else {
+    document.getElementById('client-app').classList.add('show'); document.getElementById('c-bottom-nav').style.display='block';
+    cInit();
+  }
+}
+
+function showError(msg) {
+  document.getElementById('loading-screen').style.display = 'none';
+  const e = document.getElementById('error-screen');
+  e.classList.add('show');
+  document.getElementById('err-msg').textContent = msg;
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (type ? ' ' + type : '') + ' show';
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ============================================================
+// ============================================================
+// CLIENT PANEL
+// ============================================================
+// ============================================================
+function cInit() {
+  if (TG_USER) {
+    document.getElementById('c-hero-name').textContent = TG_USER.first_name + '!';
+    document.getElementById('c-ph-name').textContent = TG_USER.first_name;
+    document.getElementById('c-ph-letter').textContent = TG_USER.first_name[0].toUpperCase();
+  }
+  cRenderHome();
+  cLoadHistory();
+  cRenderProfile();
+}
+
+function cGoPanel(id, el) {
+  document.querySelectorAll('.c-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.c-nt').forEach(b => b.classList.remove('active'));
+  document.getElementById('cp-' + id).classList.add('active');
+  const navBtn = document.getElementById('cn-' + id);
+  if (navBtn) navBtn.classList.add('active');
+  if (id === 'book') { cGoStep(1); cRenderBkBarbers(); }
+  if (id === 'history') cLoadHistory();
+  if (id === 'profile') cRenderProfile();
+  window.scrollTo(0, 0);
+}
+
+// HOME
+function cRenderHome() {
+  const barbers = SB_DATA.barbers.filter(b => b.active !== false);
+  const services = SB_DATA.services.filter(s => s.active !== false);
+  document.getElementById('c-mcount').textContent = barbers.length;
+
+  if (barbers.length === 0) {
+    document.getElementById('c-home-barbers').innerHTML = '<div class="c-empty-text" style="padding:20px;color:#6A5A50;font-size:12px">Hali masterlar qo\'shilmagan</div>';
+  } else {
+    document.getElementById('c-home-barbers').innerHTML = barbers.map(b => `
+      <div class="bc" onclick="cQuickSel('${b.name}')">
+        <div class="bc-ava">${b.avatar_url ? `<img src="${b.avatar_url}" onerror="this.parentNode.textContent='${b.name[0]}'">` : b.name[0]}</div>
+        <div class="bc-name">${b.name}</div>
+        <div class="bc-role">${b.role}</div>
+        <div class="bc-stars"><b>★</b> ${b.rating}</div>
+      </div>
+    `).join('');
+  }
+
+  if (services.length === 0) {
+    document.getElementById('c-home-svcs').innerHTML = '<div class="c-empty-text" style="padding:20px;color:#6A5A50;font-size:12px">Hali xizmatlar qo\'shilmagan</div>';
+  } else {
+    document.getElementById('c-home-svcs').innerHTML = services.slice(0, 3).map(s => `
+      <div class="svc-row" onclick="cGoPanel('book',null)">
+        <div class="svc-ico">${s.icon}</div>
+        <div class="svc-info"><div class="svc-nm">${s.name}</div><div class="svc-tm">${s.duration} daqiqa</div></div>
+        <div class="svc-pr">${s.price.toLocaleString()}</div>
+        <span style="font-size:12px;color:#6A5A50;margin-left:4px">›</span>
+      </div>
+    `).join('') + `<div style="text-align:right;margin-top:10px"><span class="sect-more" onclick="cGoPanel('book',null)">Barchasini ko'rish →</span></div>`;
+  }
+}
+
+function cQuickSel(name) {
+  cSelB = name;
+  cGoPanel('book', null);
+  setTimeout(() => document.getElementById('cs-btn1').removeAttribute('data-disabled'), 100);
+}
+
+// BOOKING
+function cRenderBkBarbers() {
+  const barbers = SB_DATA.barbers.filter(b => b.active !== false);
+  if (!barbers.length) {
+    document.getElementById('cs-barbers').innerHTML = '<div style="grid-column:1/-1;padding:30px;text-align:center;color:#6A5A50;font-size:13px">Hali masterlar qo\'shilmagan</div>';
+    return;
+  }
+  document.getElementById('cs-barbers').innerHTML = barbers.map(b => `
+    <div class="bk-bc ${cSelB === b.name ? 's' : ''}" onclick="cPickBarber(this,'${b.name}')">
+      <div class="bk-ava">${b.avatar_url ? `<img src="${b.avatar_url}" onerror="this.parentNode.textContent='${b.name[0]}'">` : b.name[0]}</div>
+      <div class="bk-bname">${b.name}</div>
+      <div class="bk-brole">${b.role}</div>
+      <div class="bk-bstars"><span>★</span> ${b.rating}</div>
+    </div>
+  `).join('');
+  if (cSelB) document.getElementById('cs-btn1').removeAttribute('data-disabled');
+}
+
+function cPickBarber(el, name) {
+  document.querySelectorAll('.bk-bc').forEach(c => c.classList.remove('s'));
+  el.classList.add('s');
+  cSelB = name;
+  document.getElementById('cs-btn1').removeAttribute('data-disabled');
+}
+
+function cRenderBkSvcs() {
+  const services = SB_DATA.services.filter(s => s.active !== false);
+  if (!services.length) {
+    document.getElementById('cs-svcs').innerHTML = '<div style="padding:30px;text-align:center;color:#6A5A50;font-size:13px">Hali xizmatlar qo\'shilmagan</div>';
+    return;
+  }
+  document.getElementById('cs-svcs').innerHTML = services.map(s => {
+    const sel = cSelSvcs.some(x => x.id === s.id);
+    return `<div class="bk-svc-item ${sel ? 's' : ''}" onclick="cToggleSvc(this,${s.id})">
+      <div class="bk-svc-ico">${s.icon}</div>
+      <div class="bk-svc-info"><div class="bk-svc-nm">${s.name}</div><div class="bk-svc-tm">${s.duration} daqiqa</div></div>
+      <div class="bk-svc-pr">${s.price.toLocaleString()}</div>
+      <div class="bk-svc-chk">${sel ? '✓' : ''}</div>
+    </div>`;
+  }).join('');
+}
+
+function cToggleSvc(el, id) {
+  const services = SB_DATA.services.filter(s => s.active !== false);
+  const s = services.find(x => x.id === id);
+  if (!s) return;
+  el.classList.toggle('s');
+  const chk = el.querySelector('.bk-svc-chk');
+  const idx = cSelSvcs.findIndex(x => x.id === id);
+  if (idx >= 0) {
+    cSelSvcs.splice(idx, 1); cSelTotal -= s.price; cSelDur -= s.duration;
+    if (chk) chk.textContent = '';
+  } else {
+    cSelSvcs.push({ id: s.id, name: s.name, price: s.price, duration: s.duration });
+    cSelTotal += s.price; cSelDur += s.duration;
+    if (chk) chk.textContent = '✓';
+  }
+  if(cSelSvcs.length){document.getElementById('cs-btn2').removeAttribute('data-disabled');}else{document.getElementById('cs-btn2').setAttribute('data-disabled','');}
+}
+
+// Calendar
+function cChgMonth(d) {
+  cCalM += d;
+  if (cCalM > 11) { cCalM = 0; cCalY++; }
+  if (cCalM < 0) { cCalM = 11; cCalY--; }
+  cBuildCal();
+}
+function cBuildCal() {
+  document.getElementById('c-cal-lbl').textContent = MNs[cCalM] + ' ' + cCalY;
+  const cont = document.getElementById('c-cal-days'); cont.innerHTML = '';
+  const today = new Date();
+  const first = new Date(cCalY, cCalM, 1);
+  let dow = first.getDay(); dow = dow === 0 ? 6 : dow - 1;
+  const total = new Date(cCalY, cCalM + 1, 0).getDate();
+  for (let i = 0; i < dow; i++) { const e = document.createElement('div'); e.className = 'cday empty'; cont.appendChild(e); }
+  for (let d = 1; d <= total; d++) {
+    const cell = document.createElement('div'); cell.className = 'cday';
+    const cd = new Date(cCalY, cCalM, d);
+    const td = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    if (cd < td) cell.classList.add('past');
+    else if (cd.getTime() === td.getTime()) cell.classList.add('today');
+    const ds = `${d} ${MNs[cCalM]} ${cCalY}`;
+    cell.innerHTML = `${d}${[3,7,12,18,24].includes(d) && cd >= td ? '<div class="cday-dot"></div>' : ''}`;
+    if (cSelDate === ds) cell.classList.add('sel');
+    if (!cell.classList.contains('past')) cell.onclick = () => cPickDay(cell, ds);
+    cont.appendChild(cell);
+  }
+}
+function cPickDay(el, ds) {
+  document.querySelectorAll('.cday').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel'); cSelDate = ds;
+  cBuildSlots(); // async, no await needed
+}
+async function cBuildSlots() {
+  const cont = document.getElementById('c-time-slots'); cont.innerHTML = '<div style="padding:20px;text-align:center;color:#6A5A50;font-size:12px">Vaqtlar yuklanmoqda...</div>';
+  const times = ['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00','18:30'];
+  
+  let booked = [];
+  try {
+    if (SUPABASE_URL !== 'YOUR_SUPABASE_URL' && cSelB && cSelDate) {
+      const { data } = await sb.from('bookings')
+        .select('booking_time')
+        .eq('barber_name', cSelB)
+        .eq('booking_date', cSelDate)
+        .in('status', ['pending', 'done']);
+      booked = (data || []).map(x => x.booking_time);
+    } else {
+      // Local mode: check local state
+      booked = (SB_DATA.allBookings || [])
+        .filter(b => b.barber_name === cSelB && b.booking_date === cSelDate && ['pending','done'].includes(b.status))
+        .map(b => b.booking_time);
+    }
+  } catch(e) { console.error(e); }
+
+  cont.innerHTML = '';
+  times.forEach(t => {
+    const s = document.createElement('div');
+    s.className = 'tslot' + (booked.includes(t) ? ' booked' : '');
+    s.textContent = t;
+    if (!booked.includes(t)) s.onclick = () => cPickTime(s, t);
+    cont.appendChild(s);
+  });
+  cSelTime = '';
+  document.getElementById('cs-btn3').setAttribute('data-disabled', '');
+}
+function cPickTime(el, t) {
+  document.querySelectorAll('.tslot:not(.booked)').forEach(s => s.classList.remove('sel'));
+  el.classList.add('sel'); cSelTime = t;
+  if (cSelDate && cSelTime) document.getElementById('cs-btn3').removeAttribute('data-disabled');
+}
+
+function cGoStep(n) {
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById('cs' + i);
+    if (el) el.style.display = i === n ? 'block' : 'none';
+  }
+  if (n === 2) cRenderBkSvcs();
+  if (n === 3) { cBuildCal(); if (cSelDate) cBuildSlots(); }
+  if (n === 4) cFillSum();
+  window.scrollTo(0, 0);
+}
+
+function cFillSum() {
+  document.getElementById('cs-sm-b').textContent = cSelB || '—';
+  document.getElementById('cs-sm-s').textContent = cSelSvcs.map(s => s.name).join(', ') || '—';
+  document.getElementById('cs-sm-d').textContent = cSelDate || '—';
+  document.getElementById('cs-sm-t').textContent = cSelTime || '—';
+  document.getElementById('cs-sm-dur').textContent = cSelDur + ' daqiqa';
+  document.getElementById('cs-sm-total').textContent = cSelTotal.toLocaleString() + ' so\'m';
+}
+
+async function cConfirmBk() {
+  const ph = document.getElementById('c-ph-inp').value;
+  if (!ph || ph.replace(/\D/g, '').length < 9) { showToast('Telefon raqamini to\'g\'ri kiriting!', 'err'); return; }
+
+  const bk = {
+    telegram_id: TG_USER?.id || null,
+    telegram_name: TG_USER?.first_name || null,
+    barber_name: cSelB,
+    services_text: cSelSvcs.map(s => s.name).join(', '),
+    total_price: cSelTotal,
+    duration_min: cSelDur,
+    booking_date: cSelDate,
+    booking_time: cSelTime,
+    phone: ph,
+    note: document.getElementById('c-note-inp').value,
+    status: 'pending'
+  };
+
+  try {
+    if (SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
+      const { data, error } = await sb.from('bookings').insert(bk).select().single();
+      if (error) throw error;
+      if (data) {
+        // Add to local state so history shows immediately
+        if (!SB_DATA.allBookings) SB_DATA.allBookings = [];
+        SB_DATA.allBookings.unshift(data);
+        bk.id = data.id;
+      }
+    } else {
+      // Local mode: add to state manually
+      if (!SB_DATA.allBookings) SB_DATA.allBookings = [];
+      bk.id = Date.now();
+      bk.created_at = new Date().toISOString();
+      SB_DATA.allBookings.unshift(bk);
+    }
+    // Notify bot
+    await notifyBot(bk);
+  } catch(e) {
+    console.error(e);
+    // Still add to local state even if DB fails
+    if (!SB_DATA.allBookings) SB_DATA.allBookings = [];
+    bk.id = bk.id || Date.now();
+    bk.created_at = bk.created_at || new Date().toISOString();
+    if (!SB_DATA.allBookings.find(x => x.id === bk.id)) SB_DATA.allBookings.unshift(bk);
+  }
+
+  if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+  showToast('✓ Navbat muvaffaqiyatli olindi!', 'ok');
+
+  setTimeout(() => {
+    cSelSvcs = []; cSelTotal = 0; cSelDur = 0; cSelDate = ''; cSelTime = ''; cSelB = '';
+    document.getElementById('c-ph-inp').value = '';
+    document.getElementById('c-note-inp').value = '';
+    cGoStep(1);
+    cGoPanel('history', null);
+  }, 1800);
+}
+
+async function notifyBot(bk) {
+  // Send notification to admin via Telegram Bot API
+  const msg = `🔔 <b>Yangi navbat!</b>\n\n` +
+    `👤 Mijoz: ${bk.telegram_name || 'Noma\'lum'} (${bk.phone})\n` +
+    `✂️ Master: ${bk.barber_name}\n` +
+    `💈 Xizmat: ${bk.services_text}\n` +
+    `📅 Sana: ${bk.booking_date} ${bk.booking_time}\n` +
+    `💰 Summa: ${bk.total_price.toLocaleString()} so'm\n` +
+    `⏱ Davomiylik: ${bk.duration_min} daqiqa` +
+    (bk.note ? `\n📝 Izoh: ${bk.note}` : '');
+
+  for (const adminId of ADMIN_IDS) {
+    try {
+      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: adminId, text: msg, parse_mode: 'HTML' })
+      });
+    } catch(e) { console.error('Bot notify error:', e); }
+  }
+}
+
+// HISTORY
+async function cLoadHistory() {
+  const listEl = document.getElementById('c-hist-list');
+  listEl.innerHTML = '<div class="c-empty"><div class="c-empty-icon">⏳</div><div class="c-empty-text">Yuklanmoqda...</div></div>';
+
+  let bookings = [];
+  try {
+    if (SUPABASE_URL !== 'YOUR_SUPABASE_URL' && TG_USER) {
+      const { data, error } = await sb.from('bookings')
+        .select('*')
+        .eq('telegram_id', String(TG_USER.id))
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      bookings = data || [];
+    } else if (TG_USER) {
+      // Use local state
+      bookings = (SB_DATA.allBookings || []).filter(b => String(b.telegram_id) === String(TG_USER.id));
+    }
+  } catch(e) {
+    console.error(e);
+    // Fallback to local state on error
+    bookings = (SB_DATA.allBookings || []).filter(b => String(b.telegram_id) === String(TG_USER?.id));
+  }
+
+  document.getElementById('c-hist-cnt').textContent = bookings.length + ' ta';
+
+  if (!bookings.length) {
+    listEl.innerHTML = '<div class="c-empty"><div class="c-empty-icon">📋</div><div class="c-empty-text">Hali navbatlar yo\'q.<br>Birinchi navbatingizni oling!</div></div>';
+    return;
+  }
+
+  const sl = { pending: 'Kutilmoqda', done: 'Bajarildi', cancel: 'Bekor qilindi' };
+  listEl.innerHTML = bookings.map(b => `
+    <div class="hist-card ${b.status}">
+      <div class="hist-head">
+        <div><div class="hist-date">${b.booking_date}</div><div class="hist-time">${b.booking_time} · #${b.id}</div></div>
+        <span class="hbadge ${b.status}">${sl[b.status] || b.status}</span>
+      </div>
+      <div class="hist-svc">${b.services_text}</div>
+      <div class="hist-btm">
+        <div class="hist-barber"><div class="hb-dot">${b.barber_name[0]}</div>${b.barber_name}</div>
+        <div class="hist-price">${b.total_price.toLocaleString()} so'm</div>
+      </div>
+    </div>
+  `).join('');
+
+  // Pip
+  const pending = bookings.filter(b => b.status === 'pending');
+  document.getElementById('c-pip').style.display = pending.length ? 'block' : 'none';
+}
+
+function cShowNotif() {
+  cGoPanel('history', null);
+}
+
+function cRenderProfile() {
+  const barbers = SB_DATA.barbers.filter(b => b.active !== false);
+  const services = SB_DATA.services.filter(s => s.active !== false);
+  const settings = SB_DATA.settings;
+  document.getElementById('c-pr-addr').textContent = settings.salon_addr || 'Termiz sh.';
+  document.getElementById('c-pr-mast').textContent = barbers.length + ' ta';
+  document.getElementById('c-pr-svcs').textContent = services.length + ' ta';
+}
+
+// Fallback data (empty - admin will add their own)
+function cFallbackBarbers() { return []; }
+function cFallbackServices() { return []; }
+
+// ============================================================
+// ============================================================
+// ADMIN PANEL
+// ============================================================
+// ============================================================
+async function aInit() {
+  if (TG_USER) {
+    document.getElementById('a-sb-uname').textContent = TG_USER.first_name;
+    document.getElementById('a-sb-letter').textContent = TG_USER.first_name[0].toUpperCase();
+  }
+  await aLoadAll();
+  aCheckMobile();
+  window.addEventListener('resize', aCheckMobile);
+}
+
+async function aLoadAll() {
+  try {
+    if (SUPABASE_URL === 'YOUR_SUPABASE_URL') {
+      SB_DATA.barbers = [];
+      SB_DATA.services = [];
+      SB_DATA.allBookings = [];
+      SB_DATA.settings = { salon_name:'Termiz Barber', salon_addr:'Termiz sh.', salon_phone:'+998 90 000 00 00', work_hours:[] };
+      SB_DATA.admins = [{ telegram_id:'8536944196', name:'Bosh Admin', created_at: new Date().toISOString() }];
+    } else {
+      const [bRes, sRes, bkRes, setRes, admRes] = await Promise.all([
+        sb.from('barbers').select('*').order('id'),
+        sb.from('services').select('*').order('id'),
+        sb.from('bookings').select('*').order('created_at', { ascending: false }),
+        sb.from('settings').select('*').eq('id',1).single(),
+        sb.from('admins').select('*').order('created_at')
+      ]);
+      SB_DATA.barbers = bRes.data || [];
+      SB_DATA.services = sRes.data || [];
+      SB_DATA.allBookings = bkRes.data || [];
+      SB_DATA.settings = setRes.data || {};
+      SB_DATA.admins = admRes.data || [];
+    }
+  } catch(e) { console.error(e); }
+  aDashboard();
+  aRenderBookings();
+  aRenderBarbers();
+  aRenderServices();
+  aRenderClients();
+  aRenderSettings();
+  aRenderAdmins();
+}
+
+function aGoView(id, el) {
+  document.querySelectorAll('.a-view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.a-sb-item').forEach(i => i.classList.remove('active'));
+  document.getElementById('av-' + id).classList.add('active');
+  if (el) el.classList.add('active');
+
+  const titles = { dashboard:'DASHBOARD', bookings:'NAVBATLAR', barbers:'MASTERLAR', services:'XIZMATLAR', clients:'MIJOZLAR', settings:'SOZLAMALAR', admins:'ADMINLAR' };
+  const subs = { dashboard:'Umumiy ko\'rinish', bookings:'Barcha buyurtmalar', barbers:'Master xodimlari', services:'Narxlar va xizmatlar', clients:'Mijozlar bazasi', settings:'Tizim sozlamalari', admins:'Admin ro\'yxati' };
+  document.getElementById('a-page-title').textContent = titles[id] || id.toUpperCase();
+  document.getElementById('a-page-sub').textContent = subs[id] || '';
+
+  const btn = document.getElementById('a-action-btn');
+  if (id === 'barbers') { btn.style.display='flex'; btn.textContent='+ Master qo\'shish'; btn.className='a-btn a-btn-primary'; }
+  else if (id === 'services') { btn.style.display='flex'; btn.textContent='+ Xizmat qo\'shish'; btn.className='a-btn a-btn-primary'; }
+  else btn.style.display = 'none';
+
+  if (window.innerWidth <= 768) document.getElementById('a-sidebar').classList.remove('mob-open');
+}
+
+function aGoViewMob(id, el) {
+  document.querySelectorAll('.a-bn-item').forEach(i => i.classList.remove('active'));
+  if (el) el.classList.add('active');
+  // Also sync sidebar highlight
+  document.querySelectorAll('.a-sb-item').forEach(i => {
+    const oc = i.getAttribute('onclick') || '';
+    if (oc.includes("'" + id + "'")) i.classList.add('active');
+    else i.classList.remove('active');
+  });
+  aGoView(id, null);
+}
+
+function aTopAction() {
+  const id = document.querySelector('.a-view.active').id.replace('av-', '');
+  if (id === 'barbers') aOpenBarberModal();
+  if (id === 'services') aOpenServiceModal();
+}
+
+function aToggleSidebar() {
+  document.getElementById('a-sidebar').classList.toggle('mob-open');
+}
+
+function aCheckMobile() {
+  document.getElementById('a-menu-btn').style.display = window.innerWidth <= 768 ? 'flex' : 'none';
+}
+
+// DASHBOARD
+function aDashboard() {
+  const bks = SB_DATA.allBookings || [];
+  const done = bks.filter(b => b.status === 'done');
+  const pending = bks.filter(b => b.status === 'pending');
+  const rev = done.reduce((a, b) => a + b.total_price, 0);
+  const phones = new Set(bks.map(b => b.telegram_id || b.phone).filter(Boolean));
+
+  document.getElementById('a-rev').textContent = rev >= 1000000 ? (rev/1000000).toFixed(1)+'M' : rev >= 1000 ? (rev/1000).toFixed(0)+'K' : rev;
+  document.getElementById('a-total').textContent = bks.length;
+  document.getElementById('a-pending').textContent = pending.length;
+  document.getElementById('a-clients').textContent = phones.size;
+  document.getElementById('a-nav-badge').textContent = pending.length;
+  // Update mobile badge
+  const mobBadge = document.getElementById('a-mob-badge');
+  if (mobBadge) { mobBadge.textContent = pending.length; mobBadge.style.display = pending.length > 0 ? 'flex' : 'none'; }
+
+  // Chart
+  const days = ['Du','Se','Ch','Pa','Ju','Sh','Ya'];
+  const vals = [120000, 185000, 90000, 250000, 180000, 320000, rev || 150000];
+  const mx = Math.max(...vals);
+  document.getElementById('a-chart-bars').innerHTML = vals.map((v, i) => `
+    <div class="a-chart-bar" style="height:${Math.max((v/mx)*130, 6)}px">
+      <span class="a-bar-val">${v >= 1000 ? (v/1000).toFixed(0)+'K' : v}</span>
+    </div>`).join('');
+  document.getElementById('a-chart-labels').innerHTML = days.map(d => `<div class="a-chart-lbl">${d}</div>`).join('');
+
+  // Activity
+  document.getElementById('a-activity').innerHTML = bks.slice(0, 5).map(b => `
+    <div class="a-act-item">
+      <div class="a-act-dot ${b.status === 'done' ? 'green' : b.status === 'cancel' ? 'red' : 'gold'}"></div>
+      <div><div class="a-act-text"><b>${b.barber_name}</b> — ${b.services_text}</div>
+      <div class="a-act-time">${b.booking_date} · ${b.booking_time}</div></div>
+    </div>`).join('') || '<div style="padding:16px;font-size:12px;color:#606078">Hali navbatlar yo\'q</div>';
+
+  // Recent bookings table
+  document.getElementById('a-dash-bks').innerHTML = bks.slice(0, 5).map(b => aBkRow(b)).join('');
+}
+
+function aBkRow(b) {
+  const sm = { pending:'a-badge-gold', done:'a-badge-green', cancel:'a-badge-red' };
+  const sl = { pending:'Kutilmoqda', done:'Bajarildi', cancel:'Bekor' };
+  return `<tr>
+    <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#606078">#${b.id}</span></td>
+    <td><div class="a-td-name"><div class="a-td-ava">${(b.telegram_name||'?')[0]}</div><div><div>${b.telegram_name||'Mehmon'}</div><div style="font-size:10px;color:#606078;font-family:'JetBrains Mono',monospace">${b.phone||''}</div></div></div></td>
+    <td>${b.barber_name}</td>
+    <td style="font-size:11px;color:#9090A8;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.services_text}</td>
+    <td><div style="font-size:12px">${b.booking_date}</div><div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#F0B429">${b.booking_time}</div></td>
+    <td><span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:#FFD166">${b.total_price.toLocaleString()}</span></td>
+    <td><span class="a-badge ${sm[b.status]||'a-badge-gold'}">${sl[b.status]||b.status}</span></td>
+    <td><div class="a-td-actions">
+      <button class="a-act-btn view-btn" onclick="aOpenBkDetail(${b.id})" title="Ko'rish">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </button>
+      <button class="a-act-btn del" onclick="aDeleteBk(${b.id})" title="O'chirish">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3,6 5,6 21,6"/><path d="M19,6l-1,14a2,2,0,0,1-2,2H8a2,2,0,0,1-2-2L5,6"/></svg>
+      </button>
+    </div></td>
+  </tr>`;
+}
+
+// BOOKINGS
+function aRenderBookings() {
+  const filter = document.getElementById('a-bk-filter')?.value || '';
+  const search = (document.getElementById('a-bk-search')?.value || '').toLowerCase();
+  let bks = SB_DATA.allBookings || [];
+  if (filter) bks = bks.filter(b => b.status === filter);
+  if (search) bks = bks.filter(b =>
+    (b.telegram_name||'').toLowerCase().includes(search) ||
+    (b.phone||'').includes(search) ||
+    (b.barber_name||'').toLowerCase().includes(search) ||
+    (b.services_text||'').toLowerCase().includes(search)
+  );
+  document.getElementById('a-bks-tbody').innerHTML = bks.length
+    ? bks.map(b => aBkRow(b)).join('')
+    : '<tr><td colspan="8" style="text-align:center;padding:40px;color:#606078">Navbatlar topilmadi</td></tr>';
+}
+
+function aOpenBkDetail(id) {
+  const b = (SB_DATA.allBookings || []).find(x => x.id === id);
+  if (!b) return;
+  document.getElementById('m-bk-id').textContent = b.id;
+  const sm = { pending:'a-badge-gold', done:'a-badge-green', cancel:'a-badge-red' };
+  const sl = { pending:'Kutilmoqda', done:'Bajarildi', cancel:'Bekor qilindi' };
+  document.getElementById('m-bk-content').innerHTML = [
+    ['Mijoz', b.telegram_name || 'Noma\'lum'],
+    ['Telefon', b.phone || '—'],
+    ['Master', b.barber_name],
+    ['Xizmatlar', b.services_text],
+    ['Sana', b.booking_date],
+    ['Vaqt', b.booking_time],
+    ['Davomiylik', (b.duration_min || 0) + ' daqiqa'],
+    ['Summa', b.total_price.toLocaleString() + ' so\'m'],
+    ['Izoh', b.note || '—']
+  ].map(([k, v]) => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:11px;background:#1A1A1E;border-radius:8px;margin-bottom:6px">
+      <span style="font-size:12px;color:#9090A8">${k}</span>
+      <span style="font-size:13px;font-weight:600;color:#E8E8F0">${v}</span>
+    </div>`).join('') + `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:11px;background:#1A1A1E;border-radius:8px;margin-bottom:6px">
+      <span style="font-size:12px;color:#9090A8">Status</span>
+      <span class="a-badge ${sm[b.status]||'a-badge-gold'}">${sl[b.status]||b.status}</span>
+    </div>`;
+
+  let actions = '<button class="a-btn a-btn-ghost" onclick="aCloseModal(\'m-booking\')">Yopish</button>';
+  if (b.status === 'pending') actions += `
+    <button class="a-btn" style="background:rgba(6,214,160,.1);border:1px solid rgba(6,214,160,.3);color:#06D6A0" onclick="aChangeBkStatus(${b.id},'done')">✓ Bajarildi</button>
+    <button class="a-btn" style="background:rgba(239,69,101,.08);border:1px solid rgba(239,69,101,.2);color:#EF4565" onclick="aChangeBkStatus(${b.id},'cancel')">✕ Bekor</button>`;
+  document.getElementById('m-bk-actions').innerHTML = actions;
+  aOpenModal('m-booking');
+}
+
+async function aChangeBkStatus(id, status) {
+  if (SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
+    await sb.from('bookings').update({ status }).eq('id', id);
+  }
+  const bk = (SB_DATA.allBookings || []).find(x => x.id === id);
+  if (bk) bk.status = status;
+  aCloseModal('m-booking');
+  aDashboard();
+  aRenderBookings();
+  showToast(status === 'done' ? '✓ Bajarildi' : 'Bekor qilindi', status === 'done' ? 'ok' : 'err');
+}
+
+async function aDeleteBk(id) {
+  if (!confirm('Navbatni o\'chirishni xohlaysizmi?')) return;
+  if (SUPABASE_URL !== 'YOUR_SUPABASE_URL') await sb.from('bookings').delete().eq('id', id);
+  SB_DATA.allBookings = (SB_DATA.allBookings || []).filter(b => b.id !== id);
+  aDashboard(); aRenderBookings(); aRenderClients();
+  showToast('Navbat o\'chirildi', 'err');
+}
+
+// BARBERS
+function aRenderBarbers() {
+  document.getElementById('a-barbers-grid').innerHTML = (SB_DATA.barbers || []).map(b => `
+    <div class="a-bmc">
+      <div class="a-bmc-toggle"><div class="a-toggle ${b.active ? 'on' : ''}" onclick="aToggleBarber(${b.id})"></div></div>
+      <div class="a-bmc-ava">${b.avatar_url ? `<img src="${b.avatar_url}" onerror="this.style.display='none'">` : ''}<span style="${b.avatar_url?'opacity:0;position:absolute':''}">${b.name[0]}</span></div>
+      <div class="a-bmc-name">${b.name}</div>
+      <div class="a-bmc-role">${b.role}</div>
+      <span class="a-badge ${b.active ? 'a-badge-green' : 'a-badge-red'}">${b.active ? 'Faol' : 'Nofaol'}</span>
+      <div class="a-bmc-stats">
+        <div class="a-bmc-stat"><div class="a-bmc-sval">${b.rating}</div><div class="a-bmc-slbl">Reyting</div></div>
+        <div class="a-bmc-stat"><div class="a-bmc-sval">${b.reviews || 0}</div><div class="a-bmc-slbl">Sharh</div></div>
+      </div>
+      <div class="a-bmc-actions">
+        <button class="a-act-btn edit" onclick="aOpenBarberModal(${b.id})" style="flex:1;width:auto;font-size:11px;gap:4px">
+          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Edit
+        </button>
+        <button class="a-act-btn del" onclick="aDeleteBarber(${b.id})">
+          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3,6 5,6 21,6"/><path d="M19,6l-1,14H5L4,6"/></svg>
+        </button>
+      </div>
+    </div>`).join('');
+}
+
+function aOpenBarberModal(id = null) {
+  document.getElementById('m-barber-title').textContent = id ? 'MASTERNI TAHRIRLASH' : "MASTER QO'SHISH";
+  document.getElementById('m-b-id').value = id || '';
+  if (id) {
+    const b = (SB_DATA.barbers || []).find(x => x.id === id);
+    if (b) {
+      document.getElementById('m-b-name').value = b.name;
+      document.getElementById('m-b-role').value = b.role;
+      document.getElementById('m-b-rating').value = b.rating;
+      document.getElementById('m-b-reviews').value = b.reviews || 0;
+      document.getElementById('m-b-phone').value = b.phone || '';
+      document.getElementById('m-b-avatar').value = b.avatar_url || '';
+      document.getElementById('m-b-note').value = b.note || '';
+    }
+  } else {
+    ['m-b-name','m-b-role','m-b-rating','m-b-reviews','m-b-phone','m-b-avatar','m-b-note'].forEach(i => document.getElementById(i).value = '');
+  }
+  aOpenModal('m-barber');
+}
+
+async function aSaveBarber() {
+  const id = parseInt(document.getElementById('m-b-id').value) || null;
+  const name = document.getElementById('m-b-name').value.trim();
+  if (!name) { showToast('Ismni kiriting!', 'err'); return; }
+  const obj = {
+    name, role: document.getElementById('m-b-role').value || 'Barber',
+    rating: parseFloat(document.getElementById('m-b-rating').value) || 4.5,
+    reviews: parseInt(document.getElementById('m-b-reviews').value) || 0,
+    phone: document.getElementById('m-b-phone').value,
+    avatar_url: document.getElementById('m-b-avatar').value,
+    note: document.getElementById('m-b-note').value, active: true
+  };
+  try {
+    if (SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
+      if (id) await sb.from('barbers').update(obj).eq('id', id);
+      else { const { data } = await sb.from('barbers').insert(obj).select().single(); if (data) SB_DATA.barbers.push(data); }
+    }
+    if (id) { const b = SB_DATA.barbers.find(x => x.id === id); if (b) Object.assign(b, obj); }
+    else if (SUPABASE_URL === 'YOUR_SUPABASE_URL') SB_DATA.barbers.push({ id: Date.now(), ...obj });
+  } catch(e) { console.error(e); }
+  aCloseModal('m-barber');
+  aRenderBarbers();
+  showToast(id ? 'Master yangilandi' : "Master qo'shildi", 'ok');
+}
+
+async function aToggleBarber(id) {
+  const b = (SB_DATA.barbers || []).find(x => x.id === id);
+  if (!b) return;
+  b.active = !b.active;
+  if (SUPABASE_URL !== 'YOUR_SUPABASE_URL') await sb.from('barbers').update({ active: b.active }).eq('id', id);
+  aRenderBarbers();
+  showToast(b.active ? `${b.name} faollashtirildi` : `${b.name} nofaol`, b.active ? 'ok' : 'err');
+}
+
+async function aDeleteBarber(id) {
+  if (!confirm('Masterni o\'chirishni xohlaysizmi?')) return;
+  if (SUPABASE_URL !== 'YOUR_SUPABASE_URL') await sb.from('barbers').delete().eq('id', id);
+  SB_DATA.barbers = (SB_DATA.barbers || []).filter(b => b.id !== id);
+  aRenderBarbers();
+  showToast('Master o\'chirildi', 'err');
+}
+
+// SERVICES
+function aRenderServices() {
+  document.getElementById('a-svcs-tbody').innerHTML = (SB_DATA.services || []).map(s => `
+    <tr>
+      <td style="font-size:20px">${s.icon}</td>
+      <td><div class="a-td-name">${s.name}</div></td>
+      <td><span style="font-family:'JetBrains Mono',monospace;color:#FFD166">${s.price.toLocaleString()} so'm</span></td>
+      <td><span style="font-family:'JetBrains Mono',monospace;font-size:12px">${s.duration} daqiqa</span></td>
+      <td style="font-size:12px;color:#9090A8">${s.description || '—'}</td>
+      <td><div class="a-td-actions">
+        <button class="a-act-btn edit" onclick="aOpenServiceModal(${s.id})">
+          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+        <button class="a-act-btn del" onclick="aDeleteService(${s.id})">
+          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3,6 5,6 21,6"/><path d="M19,6l-1,14H5L4,6"/></svg>
+        </button>
+      </div></td>
+    </tr>`).join('');
+}
+
+function aOpenServiceModal(id = null) {
+  document.getElementById('m-svc-title').textContent = id ? 'XIZMATNI TAHRIRLASH' : "XIZMAT QO'SHISH";
+  document.getElementById('m-s-id').value = id || '';
+  if (id) {
+    const s = (SB_DATA.services || []).find(x => x.id === id);
+    if (s) {
+      document.getElementById('m-s-name').value = s.name;
+      document.getElementById('m-s-icon').value = s.icon;
+      document.getElementById('m-s-price').value = s.price;
+      document.getElementById('m-s-dur').value = s.duration;
+      document.getElementById('m-s-desc').value = s.description || '';
+    }
+  } else {
+    ['m-s-name','m-s-icon','m-s-price','m-s-dur','m-s-desc'].forEach(i => document.getElementById(i).value = '');
+  }
+  aOpenModal('m-service');
+}
+
+async function aSaveService() {
+  const id = parseInt(document.getElementById('m-s-id').value) || null;
+  const name = document.getElementById('m-s-name').value.trim();
+  const price = parseInt(document.getElementById('m-s-price').value);
+  if (!name || !price) { showToast('Nomi va narxni kiriting!', 'err'); return; }
+  const obj = { name, icon: document.getElementById('m-s-icon').value || '✂️', price, duration: parseInt(document.getElementById('m-s-dur').value) || 30, description: document.getElementById('m-s-desc').value, active: true };
+  try {
+    if (SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
+      if (id) await sb.from('services').update(obj).eq('id', id);
+      else { const { data } = await sb.from('services').insert(obj).select().single(); if (data) SB_DATA.services.push(data); }
+    }
+    if (id) { const s = SB_DATA.services.find(x => x.id === id); if (s) Object.assign(s, obj); }
+    else if (SUPABASE_URL === 'YOUR_SUPABASE_URL') SB_DATA.services.push({ id: Date.now(), ...obj });
+  } catch(e) { console.error(e); }
+  aCloseModal('m-service');
+  aRenderServices();
+  showToast(id ? 'Xizmat yangilandi' : "Xizmat qo'shildi", 'ok');
+}
+
+async function aDeleteService(id) {
+  if (!confirm('Xizmatni o\'chirishni xohlaysizmi?')) return;
+  if (SUPABASE_URL !== 'YOUR_SUPABASE_URL') await sb.from('services').delete().eq('id', id);
+  SB_DATA.services = (SB_DATA.services || []).filter(s => s.id !== id);
+  aRenderServices();
+  showToast('Xizmat o\'chirildi', 'err');
+}
+
+// CLIENTS
+function aRenderClients() {
+  const search = (document.getElementById('a-cl-search')?.value || '').toLowerCase();
+  const bks = SB_DATA.allBookings || [];
+  const map = {};
+  bks.forEach(b => {
+    const key = b.telegram_id || b.phone || 'unknown';
+    if (!map[key]) map[key] = { tgid: b.telegram_id, name: b.telegram_name || '—', phone: b.phone || '—', visits: 0, total: 0, last: '', fav: {} };
+    map[key].visits++;
+    map[key].total += b.total_price;
+    map[key].last = b.booking_date;
+    map[key].fav[b.barber_name] = (map[key].fav[b.barber_name] || 0) + 1;
+  });
+  let clients = Object.values(map);
+  if (search) clients = clients.filter(c => (c.name || '').toLowerCase().includes(search) || (c.phone || '').includes(search));
+  document.getElementById('a-cl-tbody').innerHTML = clients.length
+    ? clients.map(c => {
+        const fav = Object.entries(c.fav).sort((a,b) => b[1]-a[1])[0];
+        return `<tr>
+          <td><div class="a-td-name"><div class="a-td-ava">${(c.name||'?')[0]}</div>${c.name}${c.tgid ? `<span style="font-size:10px;color:#606078;font-family:'JetBrains Mono',monospace;margin-left:4px">#${c.tgid}</span>` : ''}</div></td>
+          <td style="font-family:'JetBrains Mono',monospace;font-size:12px">${c.phone}</td>
+          <td>${c.visits}</td>
+          <td style="font-family:'JetBrains Mono',monospace;color:#FFD166">${c.total.toLocaleString()}</td>
+          <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#606078">${c.last}</td>
+          <td>${fav ? fav[0] : '—'}</td>
+        </tr>`;
+      }).join('')
+    : '<tr><td colspan="6" style="text-align:center;padding:40px;color:#606078">Mijozlar topilmadi</td></tr>';
+}
+
+// SETTINGS
+function aRenderSettings() {
+  const s = SB_DATA.settings || {};
+  document.getElementById('set-name').value = s.salon_name || 'Termiz Barber';
+  document.getElementById('set-addr').value = s.salon_addr || 'Termiz sh.';
+  document.getElementById('set-phone').value = s.salon_phone || '+998 90 000 00 00';
+
+  const hours = s.work_hours || [
+    {day:'Dushanba',open:'09:00',close:'20:00',active:true},
+    {day:'Seshanba',open:'09:00',close:'20:00',active:true},
+    {day:'Chorshanba',open:'09:00',close:'20:00',active:true},
+    {day:'Payshanba',open:'09:00',close:'20:00',active:true},
+    {day:'Juma',open:'09:00',close:'20:00',active:true},
+    {day:'Shanba',open:'09:00',close:'19:00',active:true},
+    {day:'Yakshanba',open:'10:00',close:'17:00',active:false},
+  ];
+  document.getElementById('a-hours-form').innerHTML = hours.map((h, i) => `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+      <div style="width:88px;font-size:12px;color:#9090A8">${h.day}</div>
+      <input class="a-form-input" type="time" value="${h.open}" id="sh-o-${i}" style="padding:8px;font-size:12px;flex:1">
+      <span style="color:#606078">—</span>
+      <input class="a-form-input" type="time" value="${h.close}" id="sh-c-${i}" style="padding:8px;font-size:12px;flex:1">
+      <div class="a-toggle ${h.active ? 'on' : ''}" onclick="this.classList.toggle('on')" id="sh-t-${i}"></div>
+    </div>`).join('');
+}
+
+async function aSaveSettings() {
+  const obj = { salon_name: document.getElementById('set-name').value, salon_addr: document.getElementById('set-addr').value, salon_phone: document.getElementById('set-phone').value };
+  SB_DATA.settings = { ...SB_DATA.settings, ...obj };
+  if (SUPABASE_URL !== 'YOUR_SUPABASE_URL') await sb.from('settings').update(obj).eq('id', 1);
+  showToast('Sozlamalar saqlandi', 'ok');
+}
+
+async function aSaveHours() {
+  const hours = (SB_DATA.settings.work_hours || Array(7).fill({})).map((h, i) => ({
+    day: h.day || '',
+    open: document.getElementById(`sh-o-${i}`)?.value || '09:00',
+    close: document.getElementById(`sh-c-${i}`)?.value || '20:00',
+    active: document.getElementById(`sh-t-${i}`)?.classList.contains('on') || false
+  }));
+  SB_DATA.settings.work_hours = hours;
+  if (SUPABASE_URL !== 'YOUR_SUPABASE_URL') await sb.from('settings').update({ work_hours: hours }).eq('id', 1);
+  showToast('Ish vaqti saqlandi', 'ok');
+}
+
+function aExportData() {
+  const blob = new Blob([JSON.stringify(SB_DATA, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'termiz_barber_export.json';
+  a.click();
+  showToast('Ma\'lumotlar export qilindi', 'ok');
+}
+
+async function aClearDone() {
+  if (!confirm('Bajarilgan navbatlarni o\'chirishni xohlaysizmi?')) return;
+  if (SUPABASE_URL !== 'YOUR_SUPABASE_URL') await sb.from('bookings').delete().eq('status', 'done');
+  SB_DATA.allBookings = (SB_DATA.allBookings || []).filter(b => b.status !== 'done');
+  aDashboard(); aRenderBookings(); aRenderClients();
+  showToast('Bajarilganlar tozalandi', 'ok');
+}
+
+// ADMINS
+function aRenderAdmins() {
+  document.getElementById('a-admins-tbody').innerHTML = (SB_DATA.admins || []).map(a => `
+    <tr>
+      <td><span style="font-family:'JetBrains Mono',monospace;color:#F0B429">${a.telegram_id}</span></td>
+      <td>${a.name}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#606078">${new Date(a.created_at).toLocaleDateString()}</td>
+      <td><button class="a-act-btn del" onclick="aDeleteAdmin('${a.telegram_id}')">
+        <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3,6 5,6 21,6"/><path d="M19,6l-1,14H5L4,6"/></svg>
+      </button></td>
+    </tr>`).join('');
+}
+
+function aOpenAdminModal() { aOpenModal('m-admin'); }
+
+async function aSaveAdmin() {
+  const tgid = document.getElementById('m-adm-id').value.trim();
+  const name = document.getElementById('m-adm-name').value.trim();
+  if (!tgid) { showToast('Telegram ID kiriting!', 'err'); return; }
+  const obj = { telegram_id: tgid, name: name || 'Admin', created_at: new Date().toISOString() };
+  if (SUPABASE_URL !== 'YOUR_SUPABASE_URL') await sb.from('admins').upsert(obj);
+  const existing = (SB_DATA.admins || []).findIndex(a => a.telegram_id === tgid);
+  if (existing >= 0) SB_DATA.admins[existing] = obj;
+  else SB_DATA.admins.push(obj);
+  aCloseModal('m-admin');
+  aRenderAdmins();
+  showToast("Admin qo'shildi", 'ok');
+}
+
+async function aDeleteAdmin(tgid) {
+  if (tgid === String(TG_USER?.id)) { showToast('O\'zingizni o\'chira olmaysiz!', 'err'); return; }
+  if (!confirm('Adminni o\'chirishni xohlaysizmi?')) return;
+  if (SUPABASE_URL !== 'YOUR_SUPABASE_URL') await sb.from('admins').delete().eq('telegram_id', tgid);
+  SB_DATA.admins = (SB_DATA.admins || []).filter(a => a.telegram_id !== tgid);
+  aRenderAdmins();
+  showToast('Admin o\'chirildi', 'err');
+}
+
+// MODAL
+function aOpenModal(id) { document.getElementById(id).classList.add('open'); }
+function aCloseModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.a-modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+</script>
+</body>
+</html>
