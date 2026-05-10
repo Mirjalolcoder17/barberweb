@@ -266,6 +266,26 @@ body{font-family:'Outfit',sans-serif}
 .c-empty-icon{font-size:44px;margin-bottom:16px;opacity:.25}
 .c-empty-text{font-size:13px;line-height:1.7}
 
+/* SKELETON LOADING */
+.skeleton{background:linear-gradient(90deg,#1D1622 25%,#261E2E 50%,#1D1622 75%);background-size:200% 100%;animation:skel 1.5s ease infinite;border-radius:8px}
+@keyframes skel{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.skel-row{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;margin-bottom:16px}
+.skel-card{width:105px;flex-shrink:0;background:#0F0B10;border:1px solid #1D1622;border-radius:18px;padding:14px 10px;text-align:center}
+.skel-ava{width:48px;height:48px;border-radius:50%;margin:0 auto 10px}
+.skel-text{height:12px;width:70%;margin:4px auto}
+.skel-text-sm{height:8px;width:50%;margin:4px auto}
+.skel-svc{background:#0F0B10;border:1px solid #1D1622;border-radius:14px;padding:13px;display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.skel-svc-ico{width:38px;height:38px;border-radius:11px}
+.skel-svc-info{flex:1}
+.skel-svc-nm{height:13px;width:60%;margin-bottom:4px}
+.skel-svc-tm{height:10px;width:30%}
+.skel-svc-pr{height:18px;width:15%}
+.skel-barber-card{background:#0F0B10;border:1.5px solid #1D1622;border-radius:16px;padding:16px;display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.skel-barber-ava{width:54px;height:54px;border-radius:50%}
+.skel-barber-info{flex:1}
+.skel-barber-name{height:14px;width:50%;margin-bottom:4px}
+.skel-barber-role{height:10px;width:30%}
+
 /* ADMIN APP */
 #admin-app{display:none;background:#0D0D0F;min-height:100vh;color:#E8E8F0}
 #admin-app.show{display:flex}
@@ -425,10 +445,10 @@ select.a-form-input option{background:#1A1A1E}
 
 /* TOAST */
 .toast-wrap{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:9999;pointer-events:none}
-.toast{background:#1A1A1E;border:1px solid #353540;color:#E8E8F0;padding:12px 22px;border-radius:30px;font-size:13px;font-weight:600;opacity:0;transform:translateY(10px);transition:.3s;white-space:nowrap;display:flex;align-items:center;gap:8px}
+.toast{background:rgba(26,26,30,0.95);border:1px solid #353540;color:#E8E8F0;padding:12px 22px;border-radius:30px;font-size:13px;font-weight:600;opacity:0;transform:translateY(10px);transition:.3s;white-space:nowrap;display:flex;align-items:center;gap:8px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 .toast.show{opacity:1;transform:translateY(0)}
-.toast.ok{border-color:rgba(6,214,160,.3);color:#06D6A0}
-.toast.err{border-color:rgba(239,69,101,.3);color:#EF4565}
+.toast.ok{border-color:rgba(240,180,41,0.4);color:#F0B429;background:rgba(240,180,41,0.1)}
+.toast.err{border-color:rgba(239,69,101,0.3);color:#EF4565;background:rgba(239,69,101,0.1)}
 
 /* ADMIN MOBILE */
 #a-bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:#141416;border-top:1px solid #2A2A32;z-index:200;padding:6px 0 env(safe-area-inset-bottom,6px)}
@@ -938,7 +958,23 @@ select.a-form-input option{background:#1A1A1E}
       <div class="a-form-group"><label class="a-form-label">Reyting</label><input class="a-form-input" type="number" id="m-b-rating" placeholder="4.9" step="0.1" min="1" max="5"></div>
       <div class="a-form-group"><label class="a-form-label">Sharhlar</label><input class="a-form-input" type="number" id="m-b-reviews" placeholder="340"></div>
       <div class="a-form-group full"><label class="a-form-label">Telefon</label><input class="a-form-input" type="tel" id="m-b-phone" placeholder="+998 90 000 00 00"></div>
-      <div class="a-form-group full"><label class="a-form-label">Rasm URL</label><input class="a-form-input" id="m-b-avatar" placeholder="https://..."></div>
+      <div class="a-form-group full">
+        <label class="a-form-label">Rasm</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <label class="a-btn a-btn-ghost" style="cursor:pointer;flex:1;text-align:center">
+            <input type="file" id="m-b-file" accept="image/*" style="display:none" onchange="aHandleFileSelect(this)">
+            📁 Fayl tanlash
+          </label>
+          <span id="m-b-file-name" style="font-size:11px;color:#606078;max-width:120px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis"></span>
+        </div>
+        <input class="a-form-input" id="m-b-avatar" placeholder="Yoki URL kiriting..." style="margin-top:8px">
+        <div id="m-b-preview" style="margin-top:8px;display:none">
+          <img id="m-b-img-preview" style="width:60px;height:60px;border-radius:8px;object-fit:cover;border:2px solid #F0B429">
+        </div>
+      </div>
+      <div class="a-form-group full" id="m-b-upload-status" style="display:none">
+        <div style="padding:8px;background:rgba(240,180,41,0.1);border-radius:6px;font-size:11px;color:#F0B429">⏳ Rasm yuklanmoqda...</div>
+      </div>
       <div class="a-form-group full"><label class="a-form-label">Izoh</label><input class="a-form-input" id="m-b-note" placeholder="Master haqida..."></div>
     </div>
     <div class="a-modal-btns">
@@ -1039,7 +1075,19 @@ const tg  = window.Telegram?.WebApp;
 const MNs = ['Yanvar','Fevral','Mart','Aprel','May','Iyun','Iyul','Avgust','Sentyabr','Oktyabr','Noyabr','Dekabr'];
 
 let SB_DATA = { barbers:[], services:[], settings:{}, allBookings:[] };
+let IS_LOADING = { barbers: true, services: true };
 let TG_USER = null;
+
+// Skeleton HTML templates
+const SKELETON_BARBERS = `<div class="skel-row">
+  <div class="skel-card"><div class="skel-ava skeleton"></div><div class="skel-text skeleton"></div><div class="skel-text-sm skeleton"></div></div>
+  <div class="skel-card"><div class="skel-ava skeleton"></div><div class="skel-text skeleton"></div><div class="skel-text-sm skeleton"></div></div>
+  <div class="skel-card"><div class="skel-ava skeleton"></div><div class="skel-text skeleton"></div><div class="skel-text-sm skeleton"></div></div>
+</div>`;
+
+const SKELETON_SERVICES = `<div class="skel-svc"><div class="skel-svc-ico skeleton"></div><div class="skel-svc-info"><div class="skel-svc-nm skeleton"></div><div class="skel-svc-tm skeleton"></div></div><div class="skel-svc-pr skeleton"></div></div>
+<div class="skel-svc"><div class="skel-svc-ico skeleton"></div><div class="skel-svc-info"><div class="skel-svc-nm skeleton"></div><div class="skel-svc-tm skeleton"></div></div><div class="skel-svc-pr skeleton"></div></div>
+<div class="skel-svc"><div class="skel-svc-ico skeleton"></div><div class="skel-svc-info"><div class="skel-svc-nm skeleton"></div><div class="skel-svc-tm skeleton"></div></div><div class="skel-svc-pr skeleton"></div></div>`;
 let IS_ADMIN = false;
 
 // Booking state
@@ -1079,6 +1127,8 @@ window.addEventListener('load', async () => {
     ]);
     SB_DATA.barbers  = bRes.data   || [];
     SB_DATA.services = sRes.data   || [];
+    IS_LOADING.barbers = false;
+    IS_LOADING.services = false;
     SB_DATA.settings = setRes.data || {};
     const adminIds = (admRes.data || []).map(a => a.telegram_id);
     IS_ADMIN = adminIds.includes(String(TG_USER.id)) || ADMIN_IDS.includes(String(TG_USER.id));
@@ -1088,6 +1138,8 @@ window.addEventListener('load', async () => {
     console.error('Supabase xatosi:', e);
     IS_ADMIN = ADMIN_IDS.includes(String(TG_USER.id));
     setLdStatus('Lokal rejimda...');
+    IS_LOADING.barbers = false;
+    IS_LOADING.services = false;
     await new Promise(r => setTimeout(r, 400));
   }
 
@@ -1142,6 +1194,42 @@ function cInit() {
   cRenderHome();
   cLoadHistory();
   cRenderProfile();
+  cSubscribeRealtime();
+}
+
+// Real-time data subscription for client
+function cSubscribeRealtime() {
+  // Subscribe to barbers changes
+  sb.channel('barbers-client')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'barbers' }, (payload) => {
+      console.log('Barbers changed:', payload);
+      if (payload.eventType === 'INSERT') {
+        SB_DATA.barbers.push(payload.new);
+      } else if (payload.eventType === 'UPDATE') {
+        const idx = SB_DATA.barbers.findIndex(b => b.id === payload.new.id);
+        if (idx >= 0) SB_DATA.barbers[idx] = payload.new;
+      } else if (payload.eventType === 'DELETE') {
+        SB_DATA.barbers = SB_DATA.barbers.filter(b => b.id !== payload.old.id);
+      }
+      cRenderHome();
+    })
+    .subscribe();
+
+  // Subscribe to services changes
+  sb.channel('services-client')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'services' }, (payload) => {
+      console.log('Services changed:', payload);
+      if (payload.eventType === 'INSERT') {
+        SB_DATA.services.push(payload.new);
+      } else if (payload.eventType === 'UPDATE') {
+        const idx = SB_DATA.services.findIndex(s => s.id === payload.new.id);
+        if (idx >= 0) SB_DATA.services[idx] = payload.new;
+      } else if (payload.eventType === 'DELETE') {
+        SB_DATA.services = SB_DATA.services.filter(s => s.id !== payload.old.id);
+      }
+      cRenderHome();
+    })
+    .subscribe();
 }
 
 // ✅ TO'G'IRLANGAN: cGoPanel — el argument olib tashlandi, ID orqali ishlaydi
@@ -1182,33 +1270,43 @@ function cRenderHome() {
   const services = SB_DATA.services.filter(s => s.active !== false);
   document.getElementById('c-mcount').textContent = barbers.length;
 
-  document.getElementById('c-home-barbers').innerHTML = barbers.length
-    ? barbers.map(b => `
-        <div class="bc" onclick="cQuickSel('${esc(b.name)}')">
-          <div class="bc-ava">${b.avatar_url
-            ? `<img src="${b.avatar_url}" onerror="this.parentNode.textContent='${b.name[0]}'">`
-            : b.name[0]}</div>
-          <div class="bc-name">${b.name}</div>
-          <div class="bc-role">${b.role}</div>
-          <div class="bc-stars"><b>★</b> ${b.rating}</div>
-        </div>`).join('')
-    : '<div class="c-empty-text" style="padding:20px;color:#6A5A50;font-size:12px">Hali masterlar qo\'shilmagan</div>';
+  // Show skeleton while loading
+  if (IS_LOADING.barbers) {
+    document.getElementById('c-home-barbers').innerHTML = SKELETON_BARBERS;
+  } else {
+    document.getElementById('c-home-barbers').innerHTML = barbers.length
+      ? barbers.map(b => `
+          <div class="bc" onclick="cQuickSel('${esc(b.name)}')">
+            <div class="bc-ava">${b.avatar_url
+              ? `<img src="${b.avatar_url}" onerror="this.parentNode.textContent='${b.name[0]}'">`
+              : b.name[0]}</div>
+            <div class="bc-name">${b.name}</div>
+            <div class="bc-role">${b.role}</div>
+            <div class="bc-stars"><b>★</b> ${b.rating}</div>
+          </div>`).join('')
+      : '<div class="c-empty-text" style="padding:20px;color:#6A5A50;font-size:12px">Hali masterlar qo\'shilmagan</div>';
+  }
 
-  document.getElementById('c-home-svcs').innerHTML = services.length
-    ? services.slice(0, 3).map(s => `
-        <div class="svc-row" onclick="cGoPanel('book')">
-          <div class="svc-ico">${s.icon}</div>
-          <div class="svc-info">
-            <div class="svc-nm">${s.name}</div>
-            <div class="svc-tm">${s.duration} daqiqa</div>
-          </div>
-          <div class="svc-pr">${s.price.toLocaleString()}</div>
-          <span style="font-size:12px;color:#6A5A50;margin-left:4px">›</span>
-        </div>`).join('') +
-      `<div style="text-align:right;margin-top:10px">
-         <span class="sect-more" onclick="cGoPanel('book')">Barchasini ko'rish →</span>
-       </div>`
-    : '<div class="c-empty-text" style="padding:20px;color:#6A5A50;font-size:12px">Hali xizmatlar qo\'shilmagan</div>';
+  // Show skeleton while loading
+  if (IS_LOADING.services) {
+    document.getElementById('c-home-svcs').innerHTML = SKELETON_SERVICES;
+  } else {
+    document.getElementById('c-home-svcs').innerHTML = services.length
+      ? services.slice(0, 3).map(s => `
+          <div class="svc-row" onclick="cGoPanel('book')">
+            <div class="svc-ico">${s.icon}</div>
+            <div class="svc-info">
+              <div class="svc-nm">${s.name}</div>
+              <div class="svc-tm">${s.duration} daqiqa</div>
+            </div>
+            <div class="svc-pr">${s.price.toLocaleString()}</div>
+            <span style="font-size:12px;color:#6A5A50;margin-left:4px">›</span>
+          </div>`).join('') +
+        `<div style="text-align:right;margin-top:10px">
+           <span class="sect-more" onclick="cGoPanel('book')">Barchasini ko'rish →</span>
+         </div>`
+      : '<div class="c-empty-text" style="padding:20px;color:#6A5A50;font-size:12px">Hali xizmatlar qo\'shilmagan</div>';
+  }
 }
 
 // BARBERS PANEL
@@ -1854,16 +1952,69 @@ function aOpenBarberModal(id = null) {
   aOpenModal('m-barber');
 }
 
+// Image upload handling
+let aSelectedFile = null;
+
+function aHandleFileSelect(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  aSelectedFile = file;
+  document.getElementById('m-b-file-name').textContent = file.name;
+
+  // Show preview
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    document.getElementById('m-b-img-preview').src = e.target.result;
+    document.getElementById('m-b-preview').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+async function aUploadBarberImage() {
+  if (!aSelectedFile) return null;
+
+  document.getElementById('m-b-upload-status').style.display = 'block';
+  try {
+    const { data, error } = await sb.storage
+      .from('barber-images')
+      .upload(`masters/${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, aSelectedFile);
+
+    if (error) throw error;
+
+    const { data: { publicUrl } } = sb.storage
+      .from('barber-images')
+      .getPublicUrl(data.path);
+
+    return publicUrl;
+  } catch (e) {
+    console.error('Upload error:', e);
+    showToast('Rasm yuklashda xatolik!', 'err');
+    return null;
+  } finally {
+    document.getElementById('m-b-upload-status').style.display = 'none';
+  }
+}
+
 async function aSaveBarber() {
   const id   = parseInt(document.getElementById('m-b-id').value) || null;
   const name = document.getElementById('m-b-name').value.trim();
   if (!name) { showToast('Ismni kiriting!', 'err'); return; }
+
+  // Upload image if selected
+  let avatarUrl = document.getElementById('m-b-avatar').value;
+  if (aSelectedFile) {
+    showToast('Rasm yuklanmoqda...', '');
+    const uploadedUrl = await aUploadBarberImage();
+    if (uploadedUrl) avatarUrl = uploadedUrl;
+  }
+
   const obj = {
     name, role:   document.getElementById('m-b-role').value   || 'Barber',
     rating:       parseFloat(document.getElementById('m-b-rating').value)  || 4.5,
     reviews:      parseInt(document.getElementById('m-b-reviews').value)   || 0,
     phone:        document.getElementById('m-b-phone').value,
-    avatar_url:   document.getElementById('m-b-avatar').value,
+    avatar_url:   avatarUrl,
     note:         document.getElementById('m-b-note').value,
     active: true
   };
@@ -1881,9 +2032,16 @@ async function aSaveBarber() {
     if (!id) SB_DATA.barbers.push({ id: Date.now(), ...obj });
     else { const b = SB_DATA.barbers.find(x => x.id === id); if (b) Object.assign(b, obj); }
   }
+
+  // Reset form
+  aSelectedFile = null;
+  document.getElementById('m-b-file-name').textContent = '';
+  document.getElementById('m-b-preview').style.display = 'none';
+  document.getElementById('m-b-file').value = '';
+
   aCloseModal('m-barber');
   aRenderBarbers();
-  showToast(id ? 'Master yangilandi' : "Master qo'shildi", 'ok');
+  showToast(id ? 'Master yangilandi ✓' : "Master qo'shildi ✓", 'ok');
 }
 
 async function aToggleBarber(id) {
