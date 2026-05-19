@@ -289,7 +289,7 @@ body{font-family:'Outfit',sans-serif}
 /* ADMIN APP */
 #admin-app{display:none;background:#0D0D0F;min-height:100vh;color:#E8E8F0}
 #admin-app.show{display:flex}
-.a-sidebar{width:220px;min-height:100vh;background:#141416;border-right:1px solid #2A2A32;display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;transition:transform .3s}
+.a-sidebar{width:220px;min-height:100vh;background:#141416;border-right:1px solid #2A2A32;display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100}
 .a-sb-brand{padding:24px 20px;border-bottom:1px solid #2A2A32}
 .a-sb-logo{display:flex;align-items:center;gap:10px}
 .a-sb-icon{width:36px;height:36px;background:#F0B429;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#0D0D0F;flex-shrink:0}
@@ -321,9 +321,8 @@ body{font-family:'Outfit',sans-serif}
 .a-btn-primary{background:#F0B429;color:#0D0D0F;font-weight:700}
 .a-btn-primary:hover{background:#FFD166;transform:translateY(-1px)}
 .a-content{flex:1;padding:24px}
-.a-view{display:none;animation:fadeUp .3s ease}
+.a-view{display:none}
 .a-view.active{display:block}
-@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
 /* ADMIN STATS */
 .a-stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
@@ -343,14 +342,14 @@ body{font-family:'Outfit',sans-serif}
 .a-sc-sub{font-size:11px;color:#606078}
 
 /* ADMIN TABLE */
-.a-table-card{background:#141416;border:1px solid #2A2A32;border-radius:12px;overflow:hidden;margin-bottom:18px}
+.a-table-card{background:#141416;border:1px solid #2A2A32;border-radius:12px;overflow-x:auto;margin-bottom:18px}
 .a-table-head{padding:16px 20px;border-bottom:1px solid #2A2A32;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .a-th-title{font-size:13px;font-weight:700;color:#E8E8F0}
 .a-search{display:flex;align-items:center;gap:7px;background:#1A1A1E;border:1px solid #2A2A32;border-radius:8px;padding:8px 12px;flex:1;max-width:220px}
 .a-search svg{color:#606078;flex-shrink:0;width:13px;height:13px}
 .a-search input{background:none;border:none;outline:none;color:#E8E8F0;font-size:12px;font-family:'DM Sans',sans-serif;width:100%}
 .a-search input::placeholder{color:#606078}
-table{width:100%;border-collapse:collapse}
+table{width:100%;border-collapse:collapse;min-width:500px}
 thead th{text-align:left;padding:11px 20px;font-size:9px;font-weight:700;letter-spacing:1.5px;color:#606078;text-transform:uppercase;font-family:'JetBrains Mono',monospace;background:#1A1A1E;border-bottom:1px solid #2A2A32}
 tbody tr{border-bottom:1px solid #2A2A32;transition:background .15s}
 tbody tr:last-child{border-bottom:none}
@@ -365,14 +364,14 @@ td{padding:13px 20px;font-size:13px;vertical-align:middle;color:#E8E8F0}
 .a-badge-gold{background:rgba(240,180,41,.08);color:#F0B429;border:1px solid rgba(240,180,41,.2)}
 .a-badge-blue{background:rgba(76,201,240,.08);color:#4CC9F0;border:1px solid rgba(76,201,240,.2)}
 .a-td-actions{display:flex;gap:5px}
-.a-act-btn{width:30px;height:30px;border-radius:7px;border:1px solid #2A2A32;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#9090A8;transition:.2s}
+.a-act-btn{width:30px;min-width:30px;height:30px;border-radius:7px;border:1px solid #2A2A32;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#9090A8;transition:.2s;pointer-events:all;position:relative;z-index:20}
 .a-act-btn.edit:hover{border-color:#4CC9F0;color:#4CC9F0;background:rgba(76,201,240,.08)}
 .a-act-btn.del:hover{border-color:#EF4565;color:#EF4565;background:rgba(239,69,101,.08)}
 .a-act-btn.view-btn:hover{border-color:#F0B429;color:#F0B429;background:rgba(240,180,41,.08)}
 
 /* ADMIN BARBER GRID */
 .a-barber-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
-.a-bmc{background:#141416;border:1px solid #2A2A32;border-radius:12px;padding:18px;text-align:center;position:relative;transition:.2s}
+.a-bmc{background:#141416;border:1px solid #2A2A32;border-radius:12px;padding:18px;text-align:center;position:relative;transition:.2s;overflow:visible}
 .a-bmc:hover{border-color:#353540}
 .a-bmc-ava{width:58px;height:58px;border-radius:50%;background:rgba(240,180,41,.08);border:2px solid rgba(240,180,41,.2);margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:24px;color:#F0B429;overflow:hidden}
 .a-bmc-ava img{width:100%;height:100%;object-fit:cover}
@@ -382,12 +381,13 @@ td{padding:13px 20px;font-size:13px;vertical-align:middle;color:#E8E8F0}
 .a-bmc-stat{background:#1A1A1E;padding:9px;text-align:center}
 .a-bmc-sval{font-family:'Bebas Neue',sans-serif;font-size:16px;color:#FFD166}
 .a-bmc-slbl{font-size:9px;color:#606078;font-family:'JetBrains Mono',monospace}
-.a-bmc-actions{display:flex;gap:5px;margin-top:10px}
-.a-bmc-actions .a-act-btn{flex:1;width:auto}
+.a-bmc-actions{display:flex;gap:5px;margin-top:10px;position:relative;z-index:10}
+.a-bmc-actions .a-act-btn{flex:1;width:auto;min-height:36px;padding:8px 12px}
+.a-bmc-actions .a-act-btn.edit{display:flex;align-items:center;justify-content:center;gap:6px}
 .a-bmc-toggle{position:absolute;top:12px;right:12px}
 
 /* TOGGLE */
-.a-toggle{width:34px;height:18px;background:#2A2A32;border-radius:9px;cursor:pointer;position:relative;transition:.3s;border:1px solid #353540}
+.a-toggle{width:34px;height:18px;background:#2A2A32;border-radius:9px;cursor:pointer;position:relative;transition:.3s;border:1px solid #353540;z-index:5}
 .a-toggle::after{content:'';position:absolute;width:12px;height:12px;background:#606078;border-radius:50%;top:2px;left:2px;transition:.3s}
 .a-toggle.on{background:rgba(6,214,160,.15);border-color:rgba(6,214,160,.3)}
 .a-toggle.on::after{background:#06D6A0;left:18px}
@@ -452,8 +452,6 @@ select.a-form-input option{background:#1A1A1E}
 
 /* ADMIN MOBILE */
 #a-bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:#141416;border-top:1px solid #2A2A32;z-index:200;padding:6px 0 env(safe-area-inset-bottom,6px)}
-.a-sidebar-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99;opacity:0;pointer-events:none;transition:opacity .3s;backdrop-filter:blur(2px)}
-.a-sidebar-overlay.show{opacity:1;pointer-events:all}
 .a-bn-items{display:flex;justify-content:space-around;align-items:center}
 .a-bn-item{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 12px;cursor:pointer;border-radius:10px;transition:.2s;position:relative;border:none;background:transparent;color:#606078;font-family:'DM Sans',sans-serif;min-width:52px}
 .a-bn-item svg{width:20px;height:20px;stroke-width:1.8;transition:.2s}
@@ -463,14 +461,14 @@ select.a-form-input option{background:#1A1A1E}
 .a-bn-badge{position:absolute;top:4px;right:8px;min-width:16px;height:16px;border-radius:8px;background:#F0B429;color:#0D0D0F;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;padding:0 4px}
 
 @media(max-width:768px){
-  .a-sidebar{transform:translateX(-100%);background:rgba(20,20,22,0.95);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
-  .a-sidebar.mob-open{transform:translateX(0)}
+  .a-sidebar{width:220px;background:#141416;transform:translateX(-100%);transition:transform 0.3s;left:0}
+  .a-sidebar.open{transform:translateX(0)}
   .a-main{margin-left:0}
   .a-stats-grid{grid-template-columns:1fr}
   .a-barber-grid{grid-template-columns:1fr 1fr}
   .a-grid-2,.a-grid-3{grid-template-columns:1fr}
   .a-form-grid{grid-template-columns:1fr}
-  .a-content{padding:12px;padding-bottom:80px;overflow-x:hidden}
+  .a-content{padding:12px;padding-bottom:80px;overflow-x:auto}
   .a-topbar{padding:10px 14px}
   .a-page-title{font-size:16px}
   table{font-size:11px}
@@ -478,8 +476,6 @@ select.a-form-input option{background:#1A1A1E}
   td{padding:8px 10px}
   .a-modal{margin:12px;max-width:calc(100vw - 24px)}
   .a-stats-grid .a-sc-val{font-size:24px}
-  .a-chart-area{overflow-x:auto;padding:14px 10px}
-  .a-chart-area::-webkit-scrollbar{height:4px}
 }
 </style>
 </head>
@@ -806,8 +802,7 @@ select.a-form-input option{background:#1A1A1E}
       </div>
     </div>
   </div>
-  <div class="a-sidebar-overlay" onclick="aToggleSidebar()"></div>
-
+  
   <div class="a-main">
     <div class="a-topbar">
       <div class="a-topbar-left">
@@ -1065,12 +1060,13 @@ select.a-form-input option{background:#1A1A1E}
 // CONFIG
 // ============================================================
 const SUPABASE_URL  = 'https://vezdgqyndfdafwcdrgfz.supabase.co';
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZlemRncXluZGZkYWZ3Y2RyZ2Z6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5MDgwMjYsImV4cCI6MjA5MzQ4NDAyNn0.k7XfxYOjHbdIVfpzJLhzvIcDUNRWHH-pLNjFIl5X22o';
+// Service role key for admin operations (bypasses RLS)
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZlemRncXluZGZkYWZ3Y2RyZ2Z6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NzkwODAyNiwiZXhwIjoyMDkzNDg0MDI2fQ.lfl41wMlXsUM5QoBKLT3O7W9M-M6LW3ps2yt0K8cmpw';
 const ADMIN_IDS     = ['8536944196'];
-const BOT_TOKEN     = '8669240949:AAESNLLcctbfYs55aR0dckNL7yqk7J5Ra-c';
+const BOT_TOKEN     = '8713436896:AAEZikFtiOUxDykT4gS59YExnO4tcVQmRFk';
 
 const { createClient } = supabase;
-const sb  = createClient(SUPABASE_URL, SUPABASE_ANON);
+const sb  = createClient(SUPABASE_URL, SUPABASE_KEY);
 const tg  = window.Telegram?.WebApp;
 const MNs = ['Yanvar','Fevral','Mart','Aprel','May','Iyun','Iyul','Avgust','Sentyabr','Oktyabr','Noyabr','Dekabr'];
 
@@ -1413,8 +1409,8 @@ function cRenderBkSvcs() {
   }
 
   cont.innerHTML = services.map(s => {
-    const sel = cSelSvcs.some(x => x.id === s.id);
-    return `<div class="bk-svc-item ${sel ? 's' : ''}" onclick="cToggleSvc(this,${s.id})">
+    const sel = cSelSvcs.some(x => String(x.id) === String(s.id));
+    return `<div class="bk-svc-item ${sel ? 's' : ''}" onclick="cToggleSvc(this,'${s.id}')">
       <div class="bk-svc-ico">${s.icon}</div>
       <div class="bk-svc-info">
         <div class="bk-svc-nm">${s.name}</div>
@@ -1429,11 +1425,11 @@ function cRenderBkSvcs() {
 }
 
 function cToggleSvc(el, id) {
-  const s = SB_DATA.services.find(x => x.id === id);
+  const s = SB_DATA.services.find(x => String(x.id) === String(id));
   if (!s) return;
   el.classList.toggle('s');
   const chk = el.querySelector('.bk-svc-chk');
-  const idx = cSelSvcs.findIndex(x => x.id === id);
+  const idx = cSelSvcs.findIndex(x => String(x.id) === String(id));
   if (idx >= 0) {
     cSelSvcs.splice(idx, 1);
     cSelTotal -= s.price;
@@ -1673,6 +1669,7 @@ function cRenderProfile() {
 function setBtnDisabled(id, disabled) {
   const btn = document.getElementById(id);
   if (!btn) return;
+  btn.disabled = disabled;
   if (disabled) btn.classList.add('disabled');
   else btn.classList.remove('disabled');
 }
@@ -1724,6 +1721,11 @@ async function aLoadAll() {
 }
 
 function aGoView(id, el) {
+  // Close sidebar on mobile when selecting menu item
+  var sidebar = document.getElementById('a-sidebar');
+  if (sidebar && window.innerWidth <= 768) {
+    sidebar.classList.remove('open');
+  }
   document.querySelectorAll('.a-view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.a-sb-item').forEach(i => i.classList.remove('active'));
   document.getElementById('av-' + id).classList.add('active');
@@ -1738,8 +1740,6 @@ function aGoView(id, el) {
   if (id === 'barbers')  { btn.style.display = 'flex'; btn.textContent = "+ Master qo'shish"; }
   else if (id === 'services') { btn.style.display = 'flex'; btn.textContent = "+ Xizmat qo'shish"; }
   else btn.style.display = 'none';
-
-  if (window.innerWidth <= 768) document.getElementById('a-sidebar').classList.remove('mob-open');
 }
 
 function aGoViewMob(id, el) {
@@ -1759,14 +1759,37 @@ function aTopAction() {
   if (id === 'services') aOpenServiceModal();
 }
 
-function aToggleSidebar() {
-  document.getElementById('a-sidebar').classList.toggle('mob-open');
-  document.querySelector('.a-sidebar-overlay').classList.toggle('show');
-}
-
 function aCheckMobile() {
   document.getElementById('a-menu-btn').style.display = window.innerWidth <= 768 ? 'flex' : 'none';
 }
+
+// GLOBAL EVENT DELEGATION - handles dynamically created button clicks
+document.addEventListener('click', function(e) {
+  let btn = e.target.closest('.a-toggle');
+  if (!btn) btn = e.target.closest('.a-act-btn.edit');
+  if (!btn) btn = e.target.closest('.a-act-btn.del');
+
+  if (!btn) return;
+
+  const onclick = btn.getAttribute('onclick');
+  if (!onclick) return;
+
+  const match = onclick.match(/^(\w+)\((.*)\)$/);
+  if (!match) return;
+
+  const funcName = match[1];
+  const args = match[2];
+
+  if (args) {
+    const arg = args.startsWith("'") ? args.slice(1, -1) : (args.startsWith('"') ? args.slice(1, -1) : parseInt(args));
+    if (typeof window[funcName] === 'function') window[funcName](arg);
+  } else {
+    if (typeof window[funcName] === 'function') window[funcName]();
+  }
+
+  e.preventDefault();
+  e.stopPropagation();
+});
 
 // DASHBOARD
 function aDashboard() {
@@ -1997,7 +2020,7 @@ async function aUploadBarberImage() {
 }
 
 async function aSaveBarber() {
-  const id   = parseInt(document.getElementById('m-b-id').value) || null;
+  const id   = document.getElementById('m-b-id').value || null;
   const name = document.getElementById('m-b-name').value.trim();
   if (!name) { showToast('Ismni kiriting!', 'err'); return; }
 
@@ -2020,12 +2043,20 @@ async function aSaveBarber() {
   };
   try {
     if (id) {
-      await sb.from('barbers').update(obj).eq('id', id);
+      // Update existing - verify it works
+      const r = await sb.from('barbers').update(obj).eq('id', id);
+      const check = await sb.from('barbers').select('*').eq('id', id).single();
+      if (!check.data || check.data.name !== name) {
+        showToast('Xatolik: Yangilanmadi!', 'err');
+        return;
+      }
       const b = SB_DATA.barbers.find(x => x.id === id);
       if (b) Object.assign(b, obj);
+      showToast('Master yangilandi ✅', 'ok');
     } else {
       const { data } = await sb.from('barbers').insert(obj).select().single();
       if (data) SB_DATA.barbers.push(data);
+      showToast('Master qo\'shildi ✅', 'ok');
     }
   } catch(e) {
     console.error(e);
@@ -2055,27 +2086,38 @@ async function aToggleBarber(id) {
 
 async function aDeleteBarber(id) {
   if (!confirm("Masterni o'chirishni xohlaysizmi?")) return;
-  try { await sb.from('barbers').delete().eq('id', id); } catch(e) { console.error(e); }
-  SB_DATA.barbers = (SB_DATA.barbers || []).filter(b => b.id !== id);
-  aRenderBarbers();
-  showToast("Master o'chirildi", 'err');
+  try {
+    const r = await sb.from('barbers').delete().eq('id', id);
+    // Verify delete worked
+    const check = await sb.from('barbers').select('id').eq('id', id).single();
+    if (check.data) {
+      showToast("Xatolik: O'chirilmadi!", 'err');
+      return;
+    }
+    SB_DATA.barbers = (SB_DATA.barbers || []).filter(b => b.id !== id);
+    aRenderBarbers();
+    showToast("Master o'chirildi ✅", 'ok');
+  } catch(e) {
+    console.error(e);
+    showToast("Xatolik: " + e.message, 'err');
+  }
 }
 
 // SERVICES
 function aRenderServices() {
   document.getElementById('a-svcs-tbody').innerHTML = (SB_DATA.services || []).map(s => `
     <tr>
-      <td style="font-size:20px">${s.icon}</td>
-      <td><div class="a-td-name">${s.name}</div></td>
-      <td><span style="font-family:'JetBrains Mono',monospace;color:#FFD166">${s.price.toLocaleString()} so'm</span></td>
-      <td><span style="font-family:'JetBrains Mono',monospace;font-size:12px">${s.duration} daqiqa</span></td>
-      <td style="font-size:12px;color:#9090A8">${s.description || '—'}</td>
-      <td><div class="a-td-actions">
+      <td data-label="Icon" style="font-size:20px">${s.icon}</td>
+      <td data-label="Nomi"><div class="a-td-name">${s.name}</div></td>
+      <td data-label="Narxi"><span style="font-family:'JetBrains Mono',monospace;color:#FFD166">${s.price.toLocaleString()} so'm</span></td>
+      <td data-label="Davomiyligi"><span style="font-family:'JetBrains Mono',monospace;font-size:12px">${s.duration} daqiqa</span></td>
+      <td data-label="Tavsif" style="font-size:12px;color:#9090A8">${s.description || '—'}</td>
+      <td data-label="Amal"><div class="a-td-actions">
         <button class="a-act-btn edit" onclick="aOpenServiceModal(${s.id})">
-          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         </button>
         <button class="a-act-btn del" onclick="aDeleteService(${s.id})">
-          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3,6 5,6 21,6"/><path d="M19,6l-1,14H5L4,6"/></svg>
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3,6 5,6 21,6"/><path d="M19,6l-1,14H5L4,6"/></svg>
         </button>
       </div></td>
     </tr>`).join('') || '<tr><td colspan="6" style="text-align:center;padding:30px;color:#606078">Xizmatlar yo\'q</td></tr>';
@@ -2100,7 +2142,7 @@ function aOpenServiceModal(id = null) {
 }
 
 async function aSaveService() {
-  const id    = parseInt(document.getElementById('m-s-id').value) || null;
+  const id    = document.getElementById('m-s-id').value || null;
   const name  = document.getElementById('m-s-name').value.trim();
   const price = parseInt(document.getElementById('m-s-price').value);
   if (!name || !price) { showToast('Nomi va narxni kiriting!', 'err'); return; }
@@ -2112,28 +2154,45 @@ async function aSaveService() {
   try {
     if (id) {
       await sb.from('services').update(obj).eq('id', id);
+      const check = await sb.from('services').select('*').eq('id', id).single();
+      if (!check.data || check.data.name !== name) {
+        showToast('Xatolik: Yangilanmadi!', 'err');
+        return;
+      }
       const s = SB_DATA.services.find(x => x.id === id);
       if (s) Object.assign(s, obj);
+      showToast('Xizmat yangilandi ✅', 'ok');
     } else {
       const { data } = await sb.from('services').insert(obj).select().single();
       if (data) SB_DATA.services.push(data);
+      showToast('Xizmat qo\'shildi ✅', 'ok');
     }
   } catch(e) {
     console.error(e);
-    if (!id) SB_DATA.services.push({ id: Date.now(), ...obj });
-    else { const s = SB_DATA.services.find(x => x.id === id); if (s) Object.assign(s, obj); }
+    showToast('Xatolik: ' + e.message, 'err');
+    return;
   }
   aCloseModal('m-service');
   aRenderServices();
-  showToast(id ? 'Xizmat yangilandi' : "Xizmat qo'shildi", 'ok');
 }
 
 async function aDeleteService(id) {
   if (!confirm("Xizmatni o'chirishni xohlaysizmi?")) return;
-  try { await sb.from('services').delete().eq('id', id); } catch(e) { console.error(e); }
-  SB_DATA.services = (SB_DATA.services || []).filter(s => s.id !== id);
-  aRenderServices();
-  showToast("Xizmat o'chirildi", 'err');
+  try {
+    await sb.from('services').delete().eq('id', id);
+    // Verify delete worked
+    const check = await sb.from('services').select('id').eq('id', id).single();
+    if (check.data) {
+      showToast("Xatolik: O'chirilmadi!", 'err');
+      return;
+    }
+    SB_DATA.services = (SB_DATA.services || []).filter(s => s.id !== id);
+    aRenderServices();
+    showToast("Xizmat o'chirildi ✅", 'ok');
+  } catch(e) {
+    console.error(e);
+    showToast("Xatolik: " + e.message, 'err');
+  }
 }
 
 // CLIENTS
@@ -2284,6 +2343,33 @@ function aOpenModal(id)  { document.getElementById(id).classList.add('open'); }
 function aCloseModal(id) { document.getElementById(id).classList.remove('open'); }
 document.querySelectorAll('.a-modal-overlay').forEach(m => {
   m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+
+// BUG 1 FIX: Add Escape key handler to close modals
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape' || e.keyCode === 27) {
+    // Close all open modals
+    document.querySelectorAll('.a-modal.open').forEach(m => m.classList.remove('open'));
+  }
+});
+
+// BUG 1 FIX: Add sidebar toggle function
+function aToggleSidebar() {
+  const sidebar = document.getElementById('a-sidebar');
+  if (sidebar) {
+    sidebar.classList.toggle('open');
+  }
+}
+
+// BUG 1 FIX: Click outside to close sidebar on mobile
+document.addEventListener('click', function(e) {
+  const sidebar = document.getElementById('a-sidebar');
+  const menuBtn = document.getElementById('a-menu-btn');
+  if (sidebar && sidebar.classList.contains('open')) {
+    if (!sidebar.contains(e.target) && (!menuBtn || !menuBtn.contains(e.target))) {
+      sidebar.classList.remove('open');
+    }
+  }
 });
 </script>
 </body>
