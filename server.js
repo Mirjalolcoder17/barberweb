@@ -29,6 +29,11 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname)));
 
+// Explicit root route — Vercel serverless uchun
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 // ============================================================
 // Supabase helper — users jadvaliga yozish/o'qish
 // ============================================================
