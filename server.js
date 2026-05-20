@@ -304,21 +304,13 @@ async function pollUpdates() {
 // ============================================================
 // Start
 // ============================================================
-if (process.env.NODE_ENV !== 'production') {
+if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`🚀 Server: http://localhost:${PORT}`);
-    console.log(`👤 ADMIN_CHAT_ID: ${ADMIN_CHAT_ID}`);
-    console.log(`🔗 MINI_APP_URL: ${MINI_APP_URL}`);
     if (String(process.env.USE_POLLING ?? 'true').toLowerCase() !== 'false') {
-      console.log('📡 Long-polling yoqildi...');
       pollUpdates();
-    } else {
-      console.log('🔗 Webhook rejimi');
     }
   });
-} else {
-  // Vercel: webhook rejimida ishlaydi — polling emas
-  console.log('🚀 Vercel serverless, webhook rejimi');
 }
 
 module.exports = app;
