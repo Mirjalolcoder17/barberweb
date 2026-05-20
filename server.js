@@ -106,6 +106,49 @@ async function editMessage(chat_id, message_id, text) {
 }
 
 // ============================================================
+// Reminder — navbatga 30 daqiqa qolganida mijozga xabar
+// ============================================================
+function scheduleReminder(booking) {
+  const { booking_date, booking_time, telegram_id, telegram_name, barber_name } = booking;
+  if (!telegram_id || !booking_date || !booking_time) return;
+
+  // Sana va vaqtni parse qilish (format: "20 May 2026" "14:30")
+  const months = {
+    'Yanvar':1,'Fevral':2,'Mart':3,'Aprel':4,'May':5,'Iyun':6,
+    'Iyul':7,'Avgust':8,'Sentyabr':9,'Oktyabr':10,'Noyabr':11,'Dekabr':12
+  };
+  try {
+    const [d, mon, y] = booking_date.split(' ');
+    const [h, m] = booking_time.split(':');
+    const month = months[mon];
+    if (!month) return;
+    const bookingMs = new Date(+y, month - 1, +d, +h, +m, 0).getTime();
+    const reminderMs = bookingMs - 30 * 60 * 1000; // 30 daqiqa oldin
+    const delay = reminderMs - Date.now();
+    if (delay < 0) return; // o'tib ketgan
+
+    setTimeout(async () => {
+      const msg =
+        `⏰ <b>Hey, ${telegram_name || 'do\'stim'}!</b>\n\n` +
+        `💈 Navbatingizga atigi <b>30 daqiqa</b> qoldi!\n\n` +
+        `🕐 Vaqt: <b>${booking_time}</b>\n` +
+        `✂️ Master: <b>${barber_name}</b>\n\n` +
+        `🏃 Uydan chiqish vaqti keldi — aks holda soch o'sib ketadi! 😄\n` +
+        `💎 <b>Black Diamond</b> da kutamiz!`;
+      try {
+        await sendMessage(telegram_id, msg);
+      } catch(e) {
+        console.error('Reminder error:', e.message);
+      }
+    }, delay);
+
+    console.log(`⏰ Reminder scheduled for ${telegram_name} at ${booking_date} ${booking_time} (in ${Math.round(delay/60000)} min)`);
+  } catch(e) {
+    console.error('scheduleReminder parse error:', e.message);
+  }
+}
+
+// ============================================================
 // /barber handler — barber o'zini tanishtiradi
 // ============================================================
 async function handleBarberCheck(msg) {
@@ -322,6 +365,9 @@ app.post('/api/queue', async (req, res) => {
         ]]
       })
     });
+
+    // 30 daqiqa reminder rejalashtirish
+    scheduleReminder(req.body);
 
     return res.json({ ok: true, queueNumber, telegramMessageId: tgData?.result?.message_id });
   } catch (e) {

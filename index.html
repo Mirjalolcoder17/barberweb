@@ -1383,10 +1383,43 @@ async function notifyBot(bk) {
       });
     } catch(e) { console.error('Barber bot xatosi:', e); }
   }
+
+  // 30 daqiqa reminder — brauzer setTimeout bilan
+  scheduleClientReminder(bk);
 }
 
+function scheduleClientReminder(bk) {
+  if (!bk.telegram_id || !bk.booking_date || !bk.booking_time) return;
+  const months = {
+    'Yanvar':0,'Fevral':1,'Mart':2,'Aprel':3,'May':4,'Iyun':5,
+    'Iyul':6,'Avgust':7,'Sentyabr':8,'Oktyabr':9,'Noyabr':10,'Dekabr':11
+  };
+  try {
+    const [d, mon, y] = bk.booking_date.split(' ');
+    const [h, m] = bk.booking_time.split(':');
+    const month = months[mon];
+    if (month === undefined) return;
+    const bookingMs = new Date(+y, month, +d, +h, +m, 0).getTime();
+    const delay = bookingMs - 30 * 60 * 1000 - Date.now();
+    if (delay < 0) return;
 
-// HISTORY
+    setTimeout(async () => {
+      const msg =
+        `⏰ <b>Hey, ${bk.telegram_name || "do'stim"}!</b>\n\n` +
+        `💈 Navbatingizga atigi <b>30 daqiqa</b> qoldi!\n\n` +
+        `🕐 Vaqt: <b>${bk.booking_time}</b>\n` +
+        `✂️ Master: <b>${bk.barber_name}</b>\n\n` +
+        `🏃 Uydan chiqish vaqti keldi — aks holda soch o'sib ketadi! 😄\n` +
+        `💎 <b>Black Diamond</b> da sizni kutamiz!`;
+      try {
+        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chat_id: bk.telegram_id, text: msg, parse_mode: 'HTML' })
+        });
+      } catch(e) { console.error('Reminder error:', e); }
+    }, delay);
+  } catch(e) { console.error('scheduleReminder error:', e); }
+}
 async function cLoadHistory() {
   const listEl = document.getElementById('c-hist-list');
   listEl.innerHTML = '<div class="c-empty"><div class="c-empty-icon">⏳</div><div class="c-empty-text">Yuklanmoqda...</div></div>';
