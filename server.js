@@ -210,18 +210,28 @@ async function handleCallback(cb) {
 
   let answerText = '';
   let statusText = '';
+  let bookingId = null;
+  let newStatus = null;
 
   if (data.startsWith('accept_')) {
-    const num = data.slice(7);
-    answerText = `✅ Navbat #${num} qabul qilindi`;
+    bookingId = data.slice(7);
+    newStatus = 'done';
+    answerText = `✅ Navbat #${bookingId} qabul qilindi`;
     statusText = `\n\n✅ <b>Qabul qilindi</b>`;
-  } else if (data.startsWith('delay_')) {
-    const num = data.slice(6);
-    answerText = `❌ Navbat #${num} kechiktirildi`;
-    statusText = `\n\n❌ <b>Kechiktirildi</b>`;
+  } else if (data.startsWith('cancel_') || data.startsWith('delay_')) {
+    bookingId = data.startsWith('cancel_') ? data.slice(7) : data.slice(6);
+    newStatus = 'cancel';
+    answerText = `❌ Navbat bekor qilindi`;
+    statusText = `\n\n❌ <b>Bekor qilindi</b>`;
   }
 
   await answerCallback(cb.id, answerText);
+
+  // Supabase da statusni yangilash
+  if (bookingId && newStatus) {
+    await sbRequest('PATCH', `bookings?id=eq.${bookingId}`, { status: newStatus });
+  }
+
   if (chatId && messageId && statusText) {
     await editMessage(chatId, messageId, originalText + statusText);
   }
