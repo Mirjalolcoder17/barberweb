@@ -390,7 +390,7 @@ app.post('/api/telegram/webhook', async (req, res) => {
 // ============================================================
 app.get('/api/cron/reminders', async (req, res) => {
   await checkReminders();
-  res.json({ ok: true, time: new Date().toISOString() });
+  res.json({ ok: true, checked: true, time: new Date().toISOString() });
 });
 
 // ============================================================
