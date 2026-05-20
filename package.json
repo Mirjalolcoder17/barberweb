@@ -1,0 +1,37 @@
+{
+  "name": "master-web-barberkuuuu",
+  "version": "2.2.0",
+  "description": "Telegram Web Mini App for a barber shop. Admin paneli olib tashlandi va navbat haqida xabar to'g'ridan-to'g'ri admin Telegram chatga yuboriladi.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/csstud1o/webbarber-admin.git"
+  },
+  "keywords": [
+    "telegram",
+    "mini-app",
+    "barber",
+    "queue",
+    "bot"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/csstud1o/webbarber-admin/issues"
+  },
+  "homepage": "https://github.com/csstud1o/webbarber-admin#readme",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.105.4",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2"
+  }
+}

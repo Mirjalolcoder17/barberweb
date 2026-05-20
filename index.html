@@ -286,10 +286,8 @@ body{font-family:'Outfit',sans-serif}
 .skel-barber-name{height:14px;width:50%;margin-bottom:4px}
 .skel-barber-role{height:10px;width:30%}
 
-/* ADMIN APP */
-#admin-app{display:none;background:#0D0D0F;min-height:100vh;color:#E8E8F0}
-#admin-app.show{display:flex}
-.a-sidebar{width:220px;min-height:100vh;background:#141416;border-right:1px solid #2A2A32;display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100}
+/* ===== ADMIN PANEL OLIB TASHLANDI ===== */
+.a-sidebar{display:none}
 .a-sb-brand{padding:24px 20px;border-bottom:1px solid #2A2A32}
 .a-sb-logo{display:flex;align-items:center;gap:10px}
 .a-sb-icon{width:36px;height:36px;background:#F0B429;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#0D0D0F;flex-shrink:0}
@@ -646,7 +644,11 @@ select.a-form-input option{background:#1A1A1E}
         </div>
         <div class="inp-wrap">
           <label class="inp-lbl">Telefon raqam</label>
-          <input class="c-inp" type="tel" id="c-ph-inp" placeholder="+998 XX XXX XX XX">
+          <div style="display:flex;align-items:center;gap:8px;background:#0F0B10;border:1.5px solid #1D1622;border-radius:12px;padding:13px 16px">
+            <span style="font-size:16px">📱</span>
+            <input class="c-inp" type="tel" id="c-ph-inp" readonly style="border:none;background:transparent;padding:0;opacity:0.7;cursor:not-allowed;flex:1">
+            <span style="font-size:10px;color:#9A5A14;font-family:'DM Mono',monospace">Botdan</span>
+          </div>
         </div>
         <div class="inp-wrap">
           <label class="inp-lbl">Izoh (ixtiyoriy)</label>
@@ -746,322 +748,14 @@ select.a-form-input option{background:#1A1A1E}
   </div>
 </div>
 
-<!-- ADMIN APP -->
-<div id="admin-app">
-  <div class="a-sidebar" id="a-sidebar">
-    <div class="a-sb-brand">
-      <div class="a-sb-logo">
-        <div class="a-sb-icon">✂</div>
-        <div>
-          <div class="a-sb-title">TERMIZ BARBER</div>
-          <div class="a-sb-sub">ADMIN · v2.1</div>
-        </div>
-      </div>
-    </div>
-    <div class="a-sb-nav">
-      <div class="a-sb-sec">Asosiy</div>
-      <div class="a-sb-item active" onclick="aGoView('dashboard',this)">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-        Dashboard
-      </div>
-      <div class="a-sb-item" onclick="aGoView('bookings',this)">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        Navbatlar
-        <span class="a-sb-badge" id="a-nav-badge">0</span>
-      </div>
-      <div class="a-sb-sec">Boshqaruv</div>
-      <div class="a-sb-item" onclick="aGoView('barbers',this)">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
-        Masterlar
-      </div>
-      <div class="a-sb-item" onclick="aGoView('services',this)">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
-        Xizmatlar
-      </div>
-      <div class="a-sb-item" onclick="aGoView('clients',this)">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        Mijozlar
-      </div>
-      <div class="a-sb-sec">Sozlamalar</div>
-      <div class="a-sb-item" onclick="aGoView('settings',this)">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-        Sozlamalar
-      </div>
-      <div class="a-sb-item" onclick="aGoView('admins',this)">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        Adminlar
-      </div>
-    </div>
-    <div class="a-sb-footer">
-      <div class="a-sb-user">
-        <div class="a-sb-ava" id="a-sb-letter">A</div>
-        <div>
-          <div class="a-sb-uname" id="a-sb-uname">Admin</div>
-          <div class="a-sb-urole">Super Admin · TG</div>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  <div class="a-main">
-    <div class="a-topbar">
-      <div class="a-topbar-left">
-        <button class="a-btn a-btn-ghost" onclick="aToggleSidebar()" id="a-menu-btn" style="display:none">☰</button>
-        <div>
-          <div class="a-page-title" id="a-page-title">DASHBOARD</div>
-          <div class="a-page-sub" id="a-page-sub">Umumiy ko'rinish</div>
-        </div>
-      </div>
-      <div class="a-topbar-right">
-        <button class="a-btn a-btn-primary" id="a-action-btn" style="display:none" onclick="aTopAction()"></button>
-      </div>
-    </div>
-
-    <div class="a-content">
-      <!-- DASHBOARD -->
-      <div class="a-view active" id="av-dashboard">
-        <div class="a-stats-grid">
-          <div class="a-stat gold"><div class="a-sc-label">Jami tushum</div><div class="a-sc-val" id="a-rev">0</div><div class="a-sc-sub">Bajarilgan</div></div>
-          <div class="a-stat green"><div class="a-sc-label">Jami navbatlar</div><div class="a-sc-val" id="a-total">0</div><div class="a-sc-sub">Barcha vaqt</div></div>
-          <div class="a-stat red"><div class="a-sc-label">Kutilayotgan</div><div class="a-sc-val" id="a-pending">0</div><div class="a-sc-sub">Tasdiqlash kerak</div></div>
-          <div class="a-stat blue"><div class="a-sc-label">Mijozlar</div><div class="a-sc-val" id="a-clients">0</div><div class="a-sc-sub">Unique</div></div>
-        </div>
-        <div class="a-grid-3">
-          <div class="a-table-card">
-            <div class="a-table-head"><div class="a-th-title">Haftalik statistika</div></div>
-            <div class="a-chart-area" id="a-chart-bars"></div>
-            <div class="a-chart-labels" id="a-chart-labels"></div>
-          </div>
-          <div class="a-table-card">
-            <div class="a-table-head"><div class="a-th-title">Faoliyat</div></div>
-            <div class="a-activity" id="a-activity"></div>
-          </div>
-        </div>
-        <div class="a-table-card">
-          <div class="a-table-head">
-            <div class="a-th-title">Oxirgi navbatlar</div>
-            <button class="a-btn a-btn-ghost" onclick="aGoView('bookings',null)" style="font-size:12px">Barchasi →</button>
-          </div>
-          <table><thead><tr><th>#</th><th>Mijoz</th><th>Master</th><th>Xizmat</th><th>Sana</th><th>Summa</th><th>Status</th><th>Amal</th></tr></thead>
-          <tbody id="a-dash-bks"></tbody></table>
-        </div>
-      </div>
-
-      <!-- BOOKINGS -->
-      <div class="a-view" id="av-bookings">
-        <div class="a-table-card">
-          <div class="a-table-head">
-            <div class="a-th-title">Barcha navbatlar</div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-              <select class="a-form-input" id="a-bk-filter" onchange="aRenderBookings()" style="width:auto;padding:8px 10px;font-size:12px">
-                <option value="">Barcha status</option>
-                <option value="pending">Kutilayotgan</option>
-                <option value="done">Bajarildi</option>
-                <option value="cancel">Bekor</option>
-              </select>
-              <div class="a-search">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                <input type="text" placeholder="Qidirish..." id="a-bk-search" oninput="aRenderBookings()">
-              </div>
-            </div>
-          </div>
-          <table><thead><tr><th>#</th><th>Mijoz</th><th>Master</th><th>Xizmat</th><th>Sana/Vaqt</th><th>Summa</th><th>Status</th><th>Amal</th></tr></thead>
-          <tbody id="a-bks-tbody"></tbody></table>
-        </div>
-      </div>
-
-      <!-- BARBERS -->
-      <div class="a-view" id="av-barbers">
-        <div class="a-barber-grid" id="a-barbers-grid"></div>
-      </div>
-
-      <!-- SERVICES -->
-      <div class="a-view" id="av-services">
-        <div class="a-table-card">
-          <div class="a-table-head"><div class="a-th-title">Xizmatlar</div></div>
-          <table><thead><tr><th>Icon</th><th>Nomi</th><th>Narxi</th><th>Davomiyligi</th><th>Tavsif</th><th>Amal</th></tr></thead>
-          <tbody id="a-svcs-tbody"></tbody></table>
-        </div>
-      </div>
-
-      <!-- CLIENTS -->
-      <div class="a-view" id="av-clients">
-        <div class="a-table-card">
-          <div class="a-table-head">
-            <div class="a-th-title">Mijozlar bazasi</div>
-            <div class="a-search">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <input type="text" placeholder="Telefon yoki ism..." id="a-cl-search" oninput="aRenderClients()">
-            </div>
-          </div>
-          <table><thead><tr><th>Telegram</th><th>Telefon</th><th>Tashrif</th><th>Xarajat</th><th>Oxirgi tashrif</th><th>Sevimli master</th></tr></thead>
-          <tbody id="a-cl-tbody"></tbody></table>
-        </div>
-      </div>
-
-      <!-- SETTINGS -->
-      <div class="a-view" id="av-settings">
-        <div class="a-grid-2">
-          <div class="a-table-card" style="padding:22px">
-            <div class="a-th-title" style="margin-bottom:18px">Salon ma'lumotlari</div>
-            <div class="a-form-group"><label class="a-form-label">Salon nomi</label><input class="a-form-input" id="set-name" type="text"></div>
-            <div class="a-form-group"><label class="a-form-label">Manzil</label><input class="a-form-input" id="set-addr" type="text"></div>
-            <div class="a-form-group"><label class="a-form-label">Telefon</label><input class="a-form-input" id="set-phone" type="text"></div>
-            <button class="a-btn a-btn-primary" onclick="aSaveSettings()" style="width:100%;justify-content:center;padding:12px">Saqlash</button>
-          </div>
-          <div class="a-table-card" style="padding:22px">
-            <div class="a-th-title" style="margin-bottom:18px">Ish vaqti</div>
-            <div id="a-hours-form"></div>
-            <button class="a-btn a-btn-primary" onclick="aSaveHours()" style="width:100%;justify-content:center;padding:12px;margin-top:8px">Saqlash</button>
-          </div>
-        </div>
-        <div class="a-table-card" style="padding:22px">
-          <div class="a-th-title" style="margin-bottom:14px">Ma'lumotlar</div>
-          <div style="display:flex;gap:10px;flex-wrap:wrap">
-            <button class="a-btn a-btn-ghost" onclick="aExportData()">📥 JSON Export</button>
-            <button class="a-btn" style="background:rgba(239,69,101,.08);border:1px solid rgba(239,69,101,.2);color:#EF4565" onclick="aClearDone()">Bajarilganlarni tozalash</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- ADMINS -->
-      <div class="a-view" id="av-admins">
-        <div class="a-table-card">
-          <div class="a-table-head">
-            <div class="a-th-title">Admin ro'yxati</div>
-            <button class="a-btn a-btn-primary" onclick="aOpenAdminModal()">+ Admin qo'shish</button>
-          </div>
-          <table><thead><tr><th>Telegram ID</th><th>Ism</th><th>Qo'shilgan</th><th>Amal</th></tr></thead>
-          <tbody id="a-admins-tbody"></tbody></table>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- MODALS -->
-<div class="a-modal-overlay" id="m-barber">
-  <div class="a-modal">
-    <div class="a-modal-header">
-      <div class="a-modal-title" id="m-barber-title">MASTER QO'SHISH</div>
-      <button class="a-modal-close" onclick="aCloseModal('m-barber')">✕</button>
-    </div>
-    <input type="hidden" id="m-b-id">
-    <div class="a-form-grid">
-      <div class="a-form-group"><label class="a-form-label">Ism</label><input class="a-form-input" id="m-b-name" placeholder="Mirjalol"></div>
-      <div class="a-form-group"><label class="a-form-label">Lavozim</label><input class="a-form-input" id="m-b-role" placeholder="Top Barber"></div>
-      <div class="a-form-group"><label class="a-form-label">Reyting</label><input class="a-form-input" type="number" id="m-b-rating" placeholder="4.9" step="0.1" min="1" max="5"></div>
-      <div class="a-form-group"><label class="a-form-label">Sharhlar</label><input class="a-form-input" type="number" id="m-b-reviews" placeholder="340"></div>
-      <div class="a-form-group full"><label class="a-form-label">Telefon</label><input class="a-form-input" type="tel" id="m-b-phone" placeholder="+998 90 000 00 00"></div>
-      <div class="a-form-group full">
-        <label class="a-form-label">Rasm</label>
-        <div style="display:flex;gap:8px;align-items:center">
-          <label class="a-btn a-btn-ghost" style="cursor:pointer;flex:1;text-align:center">
-            <input type="file" id="m-b-file" accept="image/*" style="display:none" onchange="aHandleFileSelect(this)">
-            📁 Fayl tanlash
-          </label>
-          <span id="m-b-file-name" style="font-size:11px;color:#606078;max-width:120px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis"></span>
-        </div>
-        <input class="a-form-input" id="m-b-avatar" placeholder="Yoki URL kiriting..." style="margin-top:8px">
-        <div id="m-b-preview" style="margin-top:8px;display:none">
-          <img id="m-b-img-preview" style="width:60px;height:60px;border-radius:8px;object-fit:cover;border:2px solid #F0B429">
-        </div>
-      </div>
-      <div class="a-form-group full" id="m-b-upload-status" style="display:none">
-        <div style="padding:8px;background:rgba(240,180,41,0.1);border-radius:6px;font-size:11px;color:#F0B429">⏳ Rasm yuklanmoqda...</div>
-      </div>
-      <div class="a-form-group full"><label class="a-form-label">Izoh</label><input class="a-form-input" id="m-b-note" placeholder="Master haqida..."></div>
-    </div>
-    <div class="a-modal-btns">
-      <button class="a-btn a-btn-ghost" onclick="aCloseModal('m-barber')">Bekor</button>
-      <button class="a-btn a-btn-primary" onclick="aSaveBarber()" style="flex:2">Saqlash</button>
-    </div>
-  </div>
-</div>
-
-<div class="a-modal-overlay" id="m-service">
-  <div class="a-modal">
-    <div class="a-modal-header">
-      <div class="a-modal-title" id="m-svc-title">XIZMAT QO'SHISH</div>
-      <button class="a-modal-close" onclick="aCloseModal('m-service')">✕</button>
-    </div>
-    <input type="hidden" id="m-s-id">
-    <div class="a-form-grid">
-      <div class="a-form-group"><label class="a-form-label">Nomi</label><input class="a-form-input" id="m-s-name" placeholder="Soch olish"></div>
-      <div class="a-form-group"><label class="a-form-label">Icon</label><input class="a-form-input" id="m-s-icon" placeholder="✂️"></div>
-      <div class="a-form-group"><label class="a-form-label">Narxi (so'm)</label><input class="a-form-input" type="number" id="m-s-price" placeholder="60000"></div>
-      <div class="a-form-group"><label class="a-form-label">Davomiyligi (min)</label><input class="a-form-input" type="number" id="m-s-dur" placeholder="30"></div>
-      <div class="a-form-group full"><label class="a-form-label">Tavsif</label><input class="a-form-input" id="m-s-desc" placeholder="Qisqacha tavsif..."></div>
-    </div>
-    <div class="a-modal-btns">
-      <button class="a-btn a-btn-ghost" onclick="aCloseModal('m-service')">Bekor</button>
-      <button class="a-btn a-btn-primary" onclick="aSaveService()" style="flex:2">Saqlash</button>
-    </div>
-  </div>
-</div>
-
-<div class="a-modal-overlay" id="m-booking">
-  <div class="a-modal">
-    <div class="a-modal-header">
-      <div class="a-modal-title">NAVBAT #<span id="m-bk-id"></span></div>
-      <button class="a-modal-close" onclick="aCloseModal('m-booking')">✕</button>
-    </div>
-    <div id="m-bk-content"></div>
-    <div class="a-modal-btns" id="m-bk-actions"></div>
-  </div>
-</div>
-
-<div class="a-modal-overlay" id="m-admin">
-  <div class="a-modal">
-    <div class="a-modal-header">
-      <div class="a-modal-title">ADMIN QO'SHISH</div>
-      <button class="a-modal-close" onclick="aCloseModal('m-admin')">✕</button>
-    </div>
-    <div class="a-form-group"><label class="a-form-label">Telegram ID</label><input class="a-form-input" id="m-adm-id" placeholder="123456789" type="number"></div>
-    <div class="a-form-group"><label class="a-form-label">Ism</label><input class="a-form-input" id="m-adm-name" placeholder="Sardor"></div>
-    <div class="a-modal-btns">
-      <button class="a-btn a-btn-ghost" onclick="aCloseModal('m-admin')">Bekor</button>
-      <button class="a-btn a-btn-primary" onclick="aSaveAdmin()" style="flex:2">Saqlash</button>
-    </div>
-  </div>
-</div>
-
 <div class="toast-wrap"><div class="toast" id="toast"></div></div>
-
-<!-- ADMIN MOBILE NAV -->
-<div id="a-bottom-nav">
-  <div class="a-bn-items">
-    <button class="a-bn-item active" onclick="aGoViewMob('dashboard',this)">
-      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-      <span>Bosh</span>
-    </button>
-    <button class="a-bn-item" onclick="aGoViewMob('bookings',this)">
-      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-      <span>Navbat</span>
-      <div class="a-bn-badge" id="a-mob-badge" style="display:none">0</div>
-    </button>
-    <button class="a-bn-item" onclick="aGoViewMob('barbers',this)">
-      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
-      <span>Master</span>
-    </button>
-    <button class="a-bn-item" onclick="aGoViewMob('services',this)">
-      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
-      <span>Xizmat</span>
-    </button>
-    <button class="a-bn-item" onclick="aGoViewMob('settings',this)">
-      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-      <span>Sozlama</span>
-    </button>
-  </div>
-</div>
 
 <script>
 // ============================================================
 // CONFIG
 // ============================================================
 const SUPABASE_URL  = 'https://vezdgqyndfdafwcdrgfz.supabase.co';
-// Service role key for admin operations (bypasses RLS)
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZlemRncXluZGZkYWZ3Y2RyZ2Z6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NzkwODAyNiwiZXhwIjoyMDkzNDg0MDI2fQ.lfl41wMlXsUM5QoBKLT3O7W9M-M6LW3ps2yt0K8cmpw';
+const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZlemRncXluZGZkYWZ3Y2RyZ2Z6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5MDgwMjYsImV4cCI6MjA5MzQ4NDAyNn0.k7XfxYOjHbdIVfpzJLhzvIcDUNRWHH-pLNjFIl5X22o';
 const ADMIN_IDS     = ['8536944196'];
 const BOT_TOKEN     = '8713436896:AAEZikFtiOUxDykT4gS59YExnO4tcVQmRFk';
 
@@ -1084,7 +778,6 @@ const SKELETON_BARBERS = `<div class="skel-row">
 const SKELETON_SERVICES = `<div class="skel-svc"><div class="skel-svc-ico skeleton"></div><div class="skel-svc-info"><div class="skel-svc-nm skeleton"></div><div class="skel-svc-tm skeleton"></div></div><div class="skel-svc-pr skeleton"></div></div>
 <div class="skel-svc"><div class="skel-svc-ico skeleton"></div><div class="skel-svc-info"><div class="skel-svc-nm skeleton"></div><div class="skel-svc-tm skeleton"></div></div><div class="skel-svc-pr skeleton"></div></div>
 <div class="skel-svc"><div class="skel-svc-ico skeleton"></div><div class="skel-svc-info"><div class="skel-svc-nm skeleton"></div><div class="skel-svc-tm skeleton"></div></div><div class="skel-svc-pr skeleton"></div></div>`;
-let IS_ADMIN = false;
 
 // Booking state
 let cSelB = '', cSelSvcs = [], cSelTotal = 0, cSelDur = 0, cSelDate = '', cSelTime = '';
@@ -1101,38 +794,57 @@ window.addEventListener('load', async () => {
   setLdStatus('Telegram tekshirilmoqda...');
 
   if (!tg) {
-    const devId = prompt('DEV MODE: Telegram ID kiriting (admin uchun: 8536944196)', '123456');
+    // DEV MODE — bot ro'yxatini bypass qilish
+    const devId = prompt('DEV MODE: Telegram ID kiriting', '123456');
     if (!devId) { showError('Telegram WebApp orqali oching!'); return; }
-    TG_USER = { id: devId, first_name: 'Dev', username: 'dev' };
+    TG_USER = { id: devId, first_name: 'Dev', username: 'dev', phone: '+998900000000' };
   } else {
     tg.ready();
     tg.expand();
     const u = tg.initDataUnsafe?.user;
-    if (!u) { showError("Foydalanuvchi ma'lumotlari topilmadi. Telegram botdan qayta oching."); return; }
+    if (!u) { showError("Foydalanuvchi topilmadi. Botdan /start ni bosib qayta oching."); return; }
     TG_USER = { id: String(u.id), first_name: u.first_name || 'Mehmon', username: u.username || '' };
+  }
+
+  setLdStatus("Ro'yxat tekshirilmoqda...");
+
+  // Foydalanuvchini bazada tekshirish
+  try {
+    const { data: userData } = await sb.from('users')
+      .select('*')
+      .eq('telegram_id', String(TG_USER.id))
+      .single();
+
+    if (!userData || !userData.phone) {
+      // Ro'yxatdan o'tmagan — xatolik ko'rsatish
+      showError("Siz ro'yxatdan o'tmagansiz! Botga /start yuboring va telefon raqamingizni ulashing.");
+      return;
+    }
+    // Telefon raqamni TG_USER ga saqlash
+    TG_USER.phone = userData.phone;
+  } catch(e) {
+    // users jadvali yo'q yoki xatolik — davom etish (DEV mode)
+    if (!TG_USER.phone) TG_USER.phone = '';
+    console.warn('Users tekshiruvi o'tkazilmadi:', e.message);
   }
 
   setLdStatus("Ma'lumotlar yuklanmoqda...");
 
   try {
-    const [bRes, sRes, setRes, admRes] = await Promise.all([
+    const [bRes, sRes, setRes] = await Promise.all([
       sb.from('barbers').select('*').eq('active', true).order('id'),
       sb.from('services').select('*').eq('active', true).order('id'),
-      sb.from('settings').select('*').eq('id', 1).single(),
-      sb.from('admins').select('telegram_id')
+      sb.from('settings').select('*').eq('id', 1).single()
     ]);
     SB_DATA.barbers  = bRes.data   || [];
     SB_DATA.services = sRes.data   || [];
     IS_LOADING.barbers = false;
     IS_LOADING.services = false;
     SB_DATA.settings = setRes.data || {};
-    const adminIds = (admRes.data || []).map(a => a.telegram_id);
-    IS_ADMIN = adminIds.includes(String(TG_USER.id)) || ADMIN_IDS.includes(String(TG_USER.id));
     setLdStatus('Tayyor!');
     await new Promise(r => setTimeout(r, 400));
   } catch(e) {
     console.error('Supabase xatosi:', e);
-    IS_ADMIN = ADMIN_IDS.includes(String(TG_USER.id));
     setLdStatus('Lokal rejimda...');
     IS_LOADING.barbers = false;
     IS_LOADING.services = false;
@@ -1150,15 +862,9 @@ function finishLoading() {
   const ls = document.getElementById('loading-screen');
   ls.classList.add('fade');
   setTimeout(() => ls.style.display = 'none', 600);
-  if (IS_ADMIN) {
-    document.getElementById('admin-app').classList.add('show');
-    document.getElementById('c-bottom-nav').style.display = 'none';
-    aInit();
-  } else {
-    document.getElementById('client-app').classList.add('show');
-    document.getElementById('c-bottom-nav').style.display = 'block';
-    cInit();
-  }
+  document.getElementById('client-app').classList.add('show');
+  document.getElementById('c-bottom-nav').style.display = 'block';
+  cInit();
 }
 
 function showError(msg) {
@@ -1516,12 +1222,28 @@ async function cBuildSlots() {
       .map(b => b.booking_time);
   }
 
+  // O'tib ketgan vaqtlarni aniqlash (bugun tanlanganda)
+  const now = new Date();
+  const todayStr = now.getDate() + ' ' + MNs[now.getMonth()] + ' ' + now.getFullYear();
+  const isToday  = cSelDate === todayStr;
+  const nowMins  = now.getHours() * 60 + now.getMinutes();
+
   cont.innerHTML = '';
   times.forEach(t => {
+    const [h, m]  = t.split(':').map(Number);
+    const slotMin = h * 60 + m;
+    const isPast  = isToday && slotMin <= nowMins;
+    const isBusy  = booked.includes(t);
+    const disabled = isPast || isBusy;
+
     const s = document.createElement('div');
-    s.className = 'tslot' + (booked.includes(t) ? ' booked' : '');
+    s.className = 'tslot' + (disabled ? ' booked' : '');
     s.textContent = t;
-    if (!booked.includes(t)) s.onclick = () => cPickTime(s, t);
+    if (isPast && !isBusy) {
+      s.style.opacity = '0.25';
+      s.title = "O'tib ketgan vaqt";
+    }
+    if (!disabled) s.onclick = () => cPickTime(s, t);
     cont.appendChild(s);
   });
 
@@ -1543,12 +1265,21 @@ function cFillSum() {
   document.getElementById('cs-sm-t').textContent     = cSelTime || '—';
   document.getElementById('cs-sm-dur').textContent   = cSelDur + ' daqiqa';
   document.getElementById('cs-sm-total').textContent = cSelTotal.toLocaleString() + ' so\'m';
+  // Telefon raqamni botdan olingan qiymat bilan to'ldirish (readonly)
+  const phInp = document.getElementById('c-ph-inp');
+  if (phInp) {
+    phInp.value    = TG_USER?.phone || '';
+    phInp.readOnly = true;
+    phInp.style.opacity = '0.6';
+    phInp.style.cursor  = 'not-allowed';
+  }
 }
 
 async function cConfirmBk() {
-  const ph = document.getElementById('c-ph-inp').value;
-  if (!ph || ph.replace(/\D/g, '').length < 9) {
-    showToast("Telefon raqamini to'g'ri kiriting!", 'err');
+  // Telefon raqam botdan olingan — o'zgartirish mumkin emas
+  const ph = TG_USER?.phone || '';
+  if (!ph) {
+    showToast("Telefon raqam topilmadi. Botdan /start yuboring!", 'err');
     return;
   }
   const bk = {
@@ -1589,11 +1320,12 @@ async function cConfirmBk() {
 
 async function notifyBot(bk) {
   const msg = `🔔 <b>Yangi navbat!</b>\n\n` +
-    `👤 Mijoz: ${bk.telegram_name || "Noma'lum"} (${bk.phone})\n` +
+    `👤 Mijoz: <b>${bk.telegram_name || "Noma'lum"}</b>\n` +
+    `📱 Telefon: <code>${bk.phone || '—'}</code>\n` +
     `✂️ Master: ${bk.barber_name}\n` +
     `💈 Xizmat: ${bk.services_text}\n` +
-    `📅 Sana: ${bk.booking_date} ${bk.booking_time}\n` +
-    `💰 Summa: ${bk.total_price.toLocaleString()} so'm\n` +
+    `📅 Sana: <b>${bk.booking_date} ${bk.booking_time}</b>\n` +
+    `💰 Summa: <b>${bk.total_price.toLocaleString()} so'm</b>\n` +
     `⏱ Davomiylik: ${bk.duration_min} daqiqa` +
     (bk.note ? `\n📝 Izoh: ${bk.note}` : '');
   for (const adminId of ADMIN_IDS) {
@@ -1601,7 +1333,17 @@ async function notifyBot(bk) {
       await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: adminId, text: msg, parse_mode: 'HTML' })
+        body: JSON.stringify({
+          chat_id: adminId,
+          text: msg,
+          parse_mode: 'HTML',
+          reply_markup: JSON.stringify({
+            inline_keyboard: [[
+              { text: '✅ Qabul', callback_data: 'accept_' + (bk.id || Date.now()) },
+              { text: '❌ Bekor', callback_data: 'cancel_' + (bk.id || Date.now()) }
+            ]]
+          })
+        })
       });
     } catch(e) { console.error('Bot xatosi:', e); }
   }
@@ -1680,697 +1422,6 @@ function esc(str) {
 
 // ============================================================
 // ============================================================
-// ADMIN PANEL
-// ============================================================
-// ============================================================
-async function aInit() {
-  if (TG_USER) {
-    document.getElementById('a-sb-uname').textContent  = TG_USER.first_name;
-    document.getElementById('a-sb-letter').textContent = TG_USER.first_name[0].toUpperCase();
-  }
-  await aLoadAll();
-  aCheckMobile();
-  window.addEventListener('resize', aCheckMobile);
-}
-
-async function aLoadAll() {
-  try {
-    const [bRes, sRes, bkRes, setRes, admRes] = await Promise.all([
-      sb.from('barbers').select('*').order('id'),
-      sb.from('services').select('*').order('id'),
-      sb.from('bookings').select('*').order('created_at', { ascending: false }),
-      sb.from('settings').select('*').eq('id', 1).single(),
-      sb.from('admins').select('*').order('created_at')
-    ]);
-    SB_DATA.barbers     = bRes.data   || [];
-    SB_DATA.services    = sRes.data   || [];
-    SB_DATA.allBookings = bkRes.data  || [];
-    SB_DATA.settings    = setRes.data || {};
-    SB_DATA.admins      = admRes.data || [];
-  } catch(e) {
-    console.error(e);
-    if (!SB_DATA.admins) SB_DATA.admins = [];
-  }
-  aDashboard();
-  aRenderBookings();
-  aRenderBarbers();
-  aRenderServices();
-  aRenderClients();
-  aRenderSettings();
-  aRenderAdmins();
-}
-
-function aGoView(id, el) {
-  // Close sidebar on mobile when selecting menu item
-  var sidebar = document.getElementById('a-sidebar');
-  if (sidebar && window.innerWidth <= 768) {
-    sidebar.classList.remove('open');
-  }
-  document.querySelectorAll('.a-view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.a-sb-item').forEach(i => i.classList.remove('active'));
-  document.getElementById('av-' + id).classList.add('active');
-  if (el) el.classList.add('active');
-
-  const titles = { dashboard:'DASHBOARD', bookings:'NAVBATLAR', barbers:'MASTERLAR', services:'XIZMATLAR', clients:'MIJOZLAR', settings:'SOZLAMALAR', admins:'ADMINLAR' };
-  const subs   = { dashboard:"Umumiy ko'rinish", bookings:'Barcha buyurtmalar', barbers:'Master xodimlari', services:'Narxlar va xizmatlar', clients:"Mijozlar bazasi", settings:'Tizim sozlamalari', admins:"Admin ro'yxati" };
-  document.getElementById('a-page-title').textContent = titles[id] || id.toUpperCase();
-  document.getElementById('a-page-sub').textContent   = subs[id]   || '';
-
-  const btn = document.getElementById('a-action-btn');
-  if (id === 'barbers')  { btn.style.display = 'flex'; btn.textContent = "+ Master qo'shish"; }
-  else if (id === 'services') { btn.style.display = 'flex'; btn.textContent = "+ Xizmat qo'shish"; }
-  else btn.style.display = 'none';
-}
-
-function aGoViewMob(id, el) {
-  document.querySelectorAll('.a-bn-item').forEach(i => i.classList.remove('active'));
-  if (el) el.classList.add('active');
-  document.querySelectorAll('.a-sb-item').forEach(i => {
-    const oc = i.getAttribute('onclick') || '';
-    if (oc.includes("'" + id + "'")) i.classList.add('active');
-    else i.classList.remove('active');
-  });
-  aGoView(id, null);
-}
-
-function aTopAction() {
-  const id = document.querySelector('.a-view.active')?.id.replace('av-', '');
-  if (id === 'barbers')  aOpenBarberModal();
-  if (id === 'services') aOpenServiceModal();
-}
-
-function aCheckMobile() {
-  document.getElementById('a-menu-btn').style.display = window.innerWidth <= 768 ? 'flex' : 'none';
-}
-
-// GLOBAL EVENT DELEGATION - handles dynamically created button clicks
-document.addEventListener('click', function(e) {
-  let btn = e.target.closest('.a-toggle');
-  if (!btn) btn = e.target.closest('.a-act-btn.edit');
-  if (!btn) btn = e.target.closest('.a-act-btn.del');
-
-  if (!btn) return;
-
-  const onclick = btn.getAttribute('onclick');
-  if (!onclick) return;
-
-  const match = onclick.match(/^(\w+)\((.*)\)$/);
-  if (!match) return;
-
-  const funcName = match[1];
-  const args = match[2];
-
-  if (args) {
-    const arg = args.startsWith("'") ? args.slice(1, -1) : (args.startsWith('"') ? args.slice(1, -1) : parseInt(args));
-    if (typeof window[funcName] === 'function') window[funcName](arg);
-  } else {
-    if (typeof window[funcName] === 'function') window[funcName]();
-  }
-
-  e.preventDefault();
-  e.stopPropagation();
-});
-
-// DASHBOARD
-function aDashboard() {
-  const bks     = SB_DATA.allBookings || [];
-  const done    = bks.filter(b => b.status === 'done');
-  const pending = bks.filter(b => b.status === 'pending');
-  const rev     = done.reduce((a, b) => a + b.total_price, 0);
-  const phones  = new Set(bks.map(b => b.telegram_id || b.phone).filter(Boolean));
-
-  document.getElementById('a-rev').textContent     = rev >= 1000000 ? (rev/1000000).toFixed(1)+'M' : rev >= 1000 ? (rev/1000).toFixed(0)+'K' : rev;
-  document.getElementById('a-total').textContent   = bks.length;
-  document.getElementById('a-pending').textContent = pending.length;
-  document.getElementById('a-clients').textContent = phones.size;
-  document.getElementById('a-nav-badge').textContent = pending.length;
-  const mb = document.getElementById('a-mob-badge');
-  if (mb) { mb.textContent = pending.length; mb.style.display = pending.length > 0 ? 'flex' : 'none'; }
-
-  const days = ['Du','Se','Ch','Pa','Ju','Sh','Ya'];
-  const vals = [120000,185000,90000,250000,180000,320000, rev || 150000];
-  const mx   = Math.max(...vals);
-  document.getElementById('a-chart-bars').innerHTML   = vals.map((v,i) =>
-    `<div class="a-chart-bar" style="height:${Math.max((v/mx)*130,6)}px"><span class="a-bar-val">${v>=1000?(v/1000).toFixed(0)+'K':v}</span></div>`).join('');
-  document.getElementById('a-chart-labels').innerHTML = days.map(d => `<div class="a-chart-lbl">${d}</div>`).join('');
-
-  document.getElementById('a-activity').innerHTML = bks.slice(0,5).map(b =>
-    `<div class="a-act-item">
-      <div class="a-act-dot ${b.status==='done'?'green':b.status==='cancel'?'red':'gold'}"></div>
-      <div>
-        <div class="a-act-text"><b>${b.barber_name}</b> — ${b.services_text}</div>
-        <div class="a-act-time">${b.booking_date} · ${b.booking_time}</div>
-      </div>
-    </div>`).join('') || '<div style="padding:16px;font-size:12px;color:#606078">Hali navbatlar yo\'q</div>';
-
-  document.getElementById('a-dash-bks').innerHTML = bks.slice(0,5).map(b => aBkRow(b)).join('');
-}
-
-function aBkRow(b) {
-  const sm = { pending:'a-badge-gold', done:'a-badge-green', cancel:'a-badge-red' };
-  const sl = { pending:'Kutilmoqda', done:'Bajarildi', cancel:'Bekor' };
-  return `<tr>
-    <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#606078">#${b.id}</span></td>
-    <td><div class="a-td-name">
-      <div class="a-td-ava">${(b.telegram_name||'?')[0]}</div>
-      <div>
-        <div>${b.telegram_name||'Mehmon'}</div>
-        <div style="font-size:10px;color:#606078;font-family:'JetBrains Mono',monospace">${b.phone||''}</div>
-      </div>
-    </div></td>
-    <td>${b.barber_name}</td>
-    <td style="font-size:11px;color:#9090A8;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.services_text}</td>
-    <td><div style="font-size:12px">${b.booking_date}</div><div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#F0B429">${b.booking_time}</div></td>
-    <td><span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:#FFD166">${b.total_price.toLocaleString()}</span></td>
-    <td><span class="a-badge ${sm[b.status]||'a-badge-gold'}">${sl[b.status]||b.status}</span></td>
-    <td><div class="a-td-actions">
-      <button class="a-act-btn view-btn" onclick="aOpenBkDetail(${b.id})" title="Ko'rish">
-        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      </button>
-      <button class="a-act-btn del" onclick="aDeleteBk(${b.id})" title="O'chirish">
-        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3,6 5,6 21,6"/><path d="M19,6l-1,14a2,2,0,0,1-2,2H8a2,2,0,0,1-2-2L5,6"/></svg>
-      </button>
-    </div></td>
-  </tr>`;
-}
-
-// BOOKINGS
-function aRenderBookings() {
-  const filter = document.getElementById('a-bk-filter')?.value || '';
-  const search = (document.getElementById('a-bk-search')?.value || '').toLowerCase();
-  let bks = SB_DATA.allBookings || [];
-  if (filter) bks = bks.filter(b => b.status === filter);
-  if (search) bks = bks.filter(b =>
-    (b.telegram_name||'').toLowerCase().includes(search) ||
-    (b.phone||'').includes(search) ||
-    (b.barber_name||'').toLowerCase().includes(search) ||
-    (b.services_text||'').toLowerCase().includes(search)
-  );
-  document.getElementById('a-bks-tbody').innerHTML = bks.length
-    ? bks.map(b => aBkRow(b)).join('')
-    : '<tr><td colspan="8" style="text-align:center;padding:40px;color:#606078">Navbatlar topilmadi</td></tr>';
-}
-
-function aOpenBkDetail(id) {
-  const b = (SB_DATA.allBookings || []).find(x => x.id === id);
-  if (!b) return;
-  document.getElementById('m-bk-id').textContent = b.id;
-  const sm = { pending:'a-badge-gold', done:'a-badge-green', cancel:'a-badge-red' };
-  const sl = { pending:'Kutilmoqda', done:'Bajarildi', cancel:'Bekor qilindi' };
-  document.getElementById('m-bk-content').innerHTML = [
-    ['Mijoz',      b.telegram_name || "Noma'lum"],
-    ['Telefon',    b.phone || '—'],
-    ['Master',     b.barber_name],
-    ['Xizmatlar',  b.services_text],
-    ['Sana',       b.booking_date],
-    ['Vaqt',       b.booking_time],
-    ['Davomiylik', (b.duration_min || 0) + ' daqiqa'],
-    ['Summa',      b.total_price.toLocaleString() + " so'm"],
-    ['Izoh',       b.note || '—']
-  ].map(([k,v]) => `
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:11px;background:#1A1A1E;border-radius:8px;margin-bottom:6px">
-      <span style="font-size:12px;color:#9090A8">${k}</span>
-      <span style="font-size:13px;font-weight:600;color:#E8E8F0">${v}</span>
-    </div>`).join('') +
-    `<div style="display:flex;justify-content:space-between;align-items:center;padding:11px;background:#1A1A1E;border-radius:8px;margin-bottom:6px">
-      <span style="font-size:12px;color:#9090A8">Status</span>
-      <span class="a-badge ${sm[b.status]||'a-badge-gold'}">${sl[b.status]||b.status}</span>
-    </div>`;
-
-  let actions = '<button class="a-btn a-btn-ghost" onclick="aCloseModal(\'m-booking\')">Yopish</button>';
-  if (b.status === 'pending') actions +=
-    `<button class="a-btn" style="background:rgba(6,214,160,.1);border:1px solid rgba(6,214,160,.3);color:#06D6A0" onclick="aChangeBkStatus(${b.id},'done')">✓ Bajarildi</button>
-     <button class="a-btn" style="background:rgba(239,69,101,.08);border:1px solid rgba(239,69,101,.2);color:#EF4565" onclick="aChangeBkStatus(${b.id},'cancel')">✕ Bekor</button>`;
-  document.getElementById('m-bk-actions').innerHTML = actions;
-  aOpenModal('m-booking');
-}
-
-async function aChangeBkStatus(id, status) {
-  try { await sb.from('bookings').update({ status }).eq('id', id); } catch(e) { console.error(e); }
-  const bk = (SB_DATA.allBookings || []).find(x => x.id === id);
-  if (bk) bk.status = status;
-  aCloseModal('m-booking');
-  aDashboard();
-  aRenderBookings();
-  showToast(status === 'done' ? '✓ Bajarildi' : 'Bekor qilindi', status === 'done' ? 'ok' : 'err');
-}
-
-async function aDeleteBk(id) {
-  if (!confirm("Navbatni o'chirishni xohlaysizmi?")) return;
-  try { await sb.from('bookings').delete().eq('id', id); } catch(e) { console.error(e); }
-  SB_DATA.allBookings = (SB_DATA.allBookings || []).filter(b => b.id !== id);
-  aDashboard(); aRenderBookings(); aRenderClients();
-  showToast("Navbat o'chirildi", 'err');
-}
-
-// BARBERS
-function aRenderBarbers() {
-  const grid = document.getElementById('a-barbers-grid');
-  if (!grid) return;
-  grid.innerHTML = (SB_DATA.barbers || []).map(b => `
-    <div class="a-bmc">
-      <div class="a-bmc-toggle">
-        <div class="a-toggle ${b.active ? 'on' : ''}" onclick="aToggleBarber(${b.id})"></div>
-      </div>
-      <div class="a-bmc-ava">
-        ${b.avatar_url ? `<img src="${b.avatar_url}" onerror="this.style.display='none'">` : ''}
-        <span>${b.name[0]}</span>
-      </div>
-      <div class="a-bmc-name">${b.name}</div>
-      <div class="a-bmc-role">${b.role}</div>
-      <span class="a-badge ${b.active ? 'a-badge-green' : 'a-badge-red'}">${b.active ? 'Faol' : 'Nofaol'}</span>
-      <div class="a-bmc-stats">
-        <div class="a-bmc-stat"><div class="a-bmc-sval">${b.rating}</div><div class="a-bmc-slbl">Reyting</div></div>
-        <div class="a-bmc-stat"><div class="a-bmc-sval">${b.reviews||0}</div><div class="a-bmc-slbl">Sharh</div></div>
-      </div>
-      <div class="a-bmc-actions">
-        <button class="a-act-btn edit" onclick="aOpenBarberModal(${b.id})" style="flex:1;width:auto;font-size:11px;gap:4px">
-          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          Edit
-        </button>
-        <button class="a-act-btn del" onclick="aDeleteBarber(${b.id})">
-          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3,6 5,6 21,6"/><path d="M19,6l-1,14H5L4,6"/></svg>
-        </button>
-      </div>
-    </div>`).join('') || '<div style="padding:30px;text-align:center;color:#606078">Masterlar yo\'q</div>';
-}
-
-function aOpenBarberModal(id = null) {
-  document.getElementById('m-barber-title').textContent = id ? 'MASTERNI TAHRIRLASH' : "MASTER QO'SHISH";
-  document.getElementById('m-b-id').value = id || '';
-  if (id) {
-    const b = (SB_DATA.barbers || []).find(x => x.id === id);
-    if (b) {
-      document.getElementById('m-b-name').value   = b.name;
-      document.getElementById('m-b-role').value   = b.role;
-      document.getElementById('m-b-rating').value = b.rating;
-      document.getElementById('m-b-reviews').value = b.reviews || 0;
-      document.getElementById('m-b-phone').value  = b.phone || '';
-      document.getElementById('m-b-avatar').value = b.avatar_url || '';
-      document.getElementById('m-b-note').value   = b.note || '';
-    }
-  } else {
-    ['m-b-name','m-b-role','m-b-rating','m-b-reviews','m-b-phone','m-b-avatar','m-b-note'].forEach(i => document.getElementById(i).value = '');
-  }
-  aOpenModal('m-barber');
-}
-
-// Image upload handling
-let aSelectedFile = null;
-
-function aHandleFileSelect(input) {
-  const file = input.files[0];
-  if (!file) return;
-
-  aSelectedFile = file;
-  document.getElementById('m-b-file-name').textContent = file.name;
-
-  // Show preview
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    document.getElementById('m-b-img-preview').src = e.target.result;
-    document.getElementById('m-b-preview').style.display = 'block';
-  };
-  reader.readAsDataURL(file);
-}
-
-async function aUploadBarberImage() {
-  if (!aSelectedFile) return null;
-
-  document.getElementById('m-b-upload-status').style.display = 'block';
-  try {
-    const { data, error } = await sb.storage
-      .from('barber-images')
-      .upload(`masters/${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, aSelectedFile);
-
-    if (error) throw error;
-
-    const { data: { publicUrl } } = sb.storage
-      .from('barber-images')
-      .getPublicUrl(data.path);
-
-    return publicUrl;
-  } catch (e) {
-    console.error('Upload error:', e);
-    showToast('Rasm yuklashda xatolik!', 'err');
-    return null;
-  } finally {
-    document.getElementById('m-b-upload-status').style.display = 'none';
-  }
-}
-
-async function aSaveBarber() {
-  const id   = document.getElementById('m-b-id').value || null;
-  const name = document.getElementById('m-b-name').value.trim();
-  if (!name) { showToast('Ismni kiriting!', 'err'); return; }
-
-  // Upload image if selected
-  let avatarUrl = document.getElementById('m-b-avatar').value;
-  if (aSelectedFile) {
-    showToast('Rasm yuklanmoqda...', '');
-    const uploadedUrl = await aUploadBarberImage();
-    if (uploadedUrl) avatarUrl = uploadedUrl;
-  }
-
-  const obj = {
-    name, role:   document.getElementById('m-b-role').value   || 'Barber',
-    rating:       parseFloat(document.getElementById('m-b-rating').value)  || 4.5,
-    reviews:      parseInt(document.getElementById('m-b-reviews').value)   || 0,
-    phone:        document.getElementById('m-b-phone').value,
-    avatar_url:   avatarUrl,
-    note:         document.getElementById('m-b-note').value,
-    active: true
-  };
-  try {
-    if (id) {
-      // Update existing - verify it works
-      const r = await sb.from('barbers').update(obj).eq('id', id);
-      const check = await sb.from('barbers').select('*').eq('id', id).single();
-      if (!check.data || check.data.name !== name) {
-        showToast('Xatolik: Yangilanmadi!', 'err');
-        return;
-      }
-      const b = SB_DATA.barbers.find(x => x.id === id);
-      if (b) Object.assign(b, obj);
-      showToast('Master yangilandi ✅', 'ok');
-    } else {
-      const { data } = await sb.from('barbers').insert(obj).select().single();
-      if (data) SB_DATA.barbers.push(data);
-      showToast('Master qo\'shildi ✅', 'ok');
-    }
-  } catch(e) {
-    console.error(e);
-    if (!id) SB_DATA.barbers.push({ id: Date.now(), ...obj });
-    else { const b = SB_DATA.barbers.find(x => x.id === id); if (b) Object.assign(b, obj); }
-  }
-
-  // Reset form
-  aSelectedFile = null;
-  document.getElementById('m-b-file-name').textContent = '';
-  document.getElementById('m-b-preview').style.display = 'none';
-  document.getElementById('m-b-file').value = '';
-
-  aCloseModal('m-barber');
-  aRenderBarbers();
-  showToast(id ? 'Master yangilandi ✓' : "Master qo'shildi ✓", 'ok');
-}
-
-async function aToggleBarber(id) {
-  const b = (SB_DATA.barbers || []).find(x => x.id === id);
-  if (!b) return;
-  b.active = !b.active;
-  try { await sb.from('barbers').update({ active: b.active }).eq('id', id); } catch(e) { console.error(e); }
-  aRenderBarbers();
-  showToast(b.active ? `${b.name} faollashtirildi` : `${b.name} nofaol`, b.active ? 'ok' : 'err');
-}
-
-async function aDeleteBarber(id) {
-  if (!confirm("Masterni o'chirishni xohlaysizmi?")) return;
-  try {
-    const r = await sb.from('barbers').delete().eq('id', id);
-    // Verify delete worked
-    const check = await sb.from('barbers').select('id').eq('id', id).single();
-    if (check.data) {
-      showToast("Xatolik: O'chirilmadi!", 'err');
-      return;
-    }
-    SB_DATA.barbers = (SB_DATA.barbers || []).filter(b => b.id !== id);
-    aRenderBarbers();
-    showToast("Master o'chirildi ✅", 'ok');
-  } catch(e) {
-    console.error(e);
-    showToast("Xatolik: " + e.message, 'err');
-  }
-}
-
-// SERVICES
-function aRenderServices() {
-  document.getElementById('a-svcs-tbody').innerHTML = (SB_DATA.services || []).map(s => `
-    <tr>
-      <td data-label="Icon" style="font-size:20px">${s.icon}</td>
-      <td data-label="Nomi"><div class="a-td-name">${s.name}</div></td>
-      <td data-label="Narxi"><span style="font-family:'JetBrains Mono',monospace;color:#FFD166">${s.price.toLocaleString()} so'm</span></td>
-      <td data-label="Davomiyligi"><span style="font-family:'JetBrains Mono',monospace;font-size:12px">${s.duration} daqiqa</span></td>
-      <td data-label="Tavsif" style="font-size:12px;color:#9090A8">${s.description || '—'}</td>
-      <td data-label="Amal"><div class="a-td-actions">
-        <button class="a-act-btn edit" onclick="aOpenServiceModal(${s.id})">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        </button>
-        <button class="a-act-btn del" onclick="aDeleteService(${s.id})">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3,6 5,6 21,6"/><path d="M19,6l-1,14H5L4,6"/></svg>
-        </button>
-      </div></td>
-    </tr>`).join('') || '<tr><td colspan="6" style="text-align:center;padding:30px;color:#606078">Xizmatlar yo\'q</td></tr>';
-}
-
-function aOpenServiceModal(id = null) {
-  document.getElementById('m-svc-title').textContent = id ? 'XIZMATNI TAHRIRLASH' : "XIZMAT QO'SHISH";
-  document.getElementById('m-s-id').value = id || '';
-  if (id) {
-    const s = (SB_DATA.services || []).find(x => x.id === id);
-    if (s) {
-      document.getElementById('m-s-name').value  = s.name;
-      document.getElementById('m-s-icon').value  = s.icon;
-      document.getElementById('m-s-price').value = s.price;
-      document.getElementById('m-s-dur').value   = s.duration;
-      document.getElementById('m-s-desc').value  = s.description || '';
-    }
-  } else {
-    ['m-s-name','m-s-icon','m-s-price','m-s-dur','m-s-desc'].forEach(i => document.getElementById(i).value = '');
-  }
-  aOpenModal('m-service');
-}
-
-async function aSaveService() {
-  const id    = document.getElementById('m-s-id').value || null;
-  const name  = document.getElementById('m-s-name').value.trim();
-  const price = parseInt(document.getElementById('m-s-price').value);
-  if (!name || !price) { showToast('Nomi va narxni kiriting!', 'err'); return; }
-  const obj = {
-    name, icon: document.getElementById('m-s-icon').value || '✂️',
-    price, duration: parseInt(document.getElementById('m-s-dur').value) || 30,
-    description: document.getElementById('m-s-desc').value, active: true
-  };
-  try {
-    if (id) {
-      await sb.from('services').update(obj).eq('id', id);
-      const check = await sb.from('services').select('*').eq('id', id).single();
-      if (!check.data || check.data.name !== name) {
-        showToast('Xatolik: Yangilanmadi!', 'err');
-        return;
-      }
-      const s = SB_DATA.services.find(x => x.id === id);
-      if (s) Object.assign(s, obj);
-      showToast('Xizmat yangilandi ✅', 'ok');
-    } else {
-      const { data } = await sb.from('services').insert(obj).select().single();
-      if (data) SB_DATA.services.push(data);
-      showToast('Xizmat qo\'shildi ✅', 'ok');
-    }
-  } catch(e) {
-    console.error(e);
-    showToast('Xatolik: ' + e.message, 'err');
-    return;
-  }
-  aCloseModal('m-service');
-  aRenderServices();
-}
-
-async function aDeleteService(id) {
-  if (!confirm("Xizmatni o'chirishni xohlaysizmi?")) return;
-  try {
-    await sb.from('services').delete().eq('id', id);
-    // Verify delete worked
-    const check = await sb.from('services').select('id').eq('id', id).single();
-    if (check.data) {
-      showToast("Xatolik: O'chirilmadi!", 'err');
-      return;
-    }
-    SB_DATA.services = (SB_DATA.services || []).filter(s => s.id !== id);
-    aRenderServices();
-    showToast("Xizmat o'chirildi ✅", 'ok');
-  } catch(e) {
-    console.error(e);
-    showToast("Xatolik: " + e.message, 'err');
-  }
-}
-
-// CLIENTS
-function aRenderClients() {
-  const search = (document.getElementById('a-cl-search')?.value || '').toLowerCase();
-  const bks = SB_DATA.allBookings || [];
-  const map = {};
-  bks.forEach(b => {
-    const key = b.telegram_id || b.phone || 'unknown';
-    if (!map[key]) map[key] = { tgid:b.telegram_id, name:b.telegram_name||'—', phone:b.phone||'—', visits:0, total:0, last:'', fav:{} };
-    map[key].visits++;
-    map[key].total += b.total_price;
-    map[key].last   = b.booking_date;
-    map[key].fav[b.barber_name] = (map[key].fav[b.barber_name] || 0) + 1;
-  });
-  let clients = Object.values(map);
-  if (search) clients = clients.filter(c =>
-    (c.name||'').toLowerCase().includes(search) || (c.phone||'').includes(search));
-  document.getElementById('a-cl-tbody').innerHTML = clients.length
-    ? clients.map(c => {
-        const fav = Object.entries(c.fav).sort((a,b) => b[1]-a[1])[0];
-        return `<tr>
-          <td><div class="a-td-name">
-            <div class="a-td-ava">${(c.name||'?')[0]}</div>
-            ${c.name}
-            ${c.tgid ? `<span style="font-size:10px;color:#606078;font-family:'JetBrains Mono',monospace;margin-left:4px">#${c.tgid}</span>` : ''}
-          </div></td>
-          <td style="font-family:'JetBrains Mono',monospace;font-size:12px">${c.phone}</td>
-          <td>${c.visits}</td>
-          <td style="font-family:'JetBrains Mono',monospace;color:#FFD166">${c.total.toLocaleString()}</td>
-          <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#606078">${c.last}</td>
-          <td>${fav ? fav[0] : '—'}</td>
-        </tr>`;
-      }).join('')
-    : '<tr><td colspan="6" style="text-align:center;padding:40px;color:#606078">Mijozlar topilmadi</td></tr>';
-}
-
-// SETTINGS
-function aRenderSettings() {
-  const s = SB_DATA.settings || {};
-  document.getElementById('set-name').value  = s.salon_name  || 'Termiz Barber';
-  document.getElementById('set-addr').value  = s.salon_addr  || 'Termiz sh.';
-  document.getElementById('set-phone').value = s.salon_phone || '+998 90 000 00 00';
-
-  const defaultHours = [
-    {day:'Dushanba', open:'09:00',close:'20:00',active:true},
-    {day:'Seshanba', open:'09:00',close:'20:00',active:true},
-    {day:'Chorshanba',open:'09:00',close:'20:00',active:true},
-    {day:'Payshanba',open:'09:00',close:'20:00',active:true},
-    {day:'Juma',     open:'09:00',close:'20:00',active:true},
-    {day:'Shanba',   open:'09:00',close:'19:00',active:true},
-    {day:'Yakshanba',open:'10:00',close:'17:00',active:false},
-  ];
-  const hours = s.work_hours || defaultHours;
-  document.getElementById('a-hours-form').innerHTML = hours.map((h,i) => `
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-      <div style="width:88px;font-size:12px;color:#9090A8">${h.day}</div>
-      <input class="a-form-input" type="time" value="${h.open}"  id="sh-o-${i}" style="padding:8px;font-size:12px;flex:1">
-      <span style="color:#606078">—</span>
-      <input class="a-form-input" type="time" value="${h.close}" id="sh-c-${i}" style="padding:8px;font-size:12px;flex:1">
-      <div class="a-toggle ${h.active?'on':''}" onclick="this.classList.toggle('on')" id="sh-t-${i}"></div>
-    </div>`).join('');
-}
-
-async function aSaveSettings() {
-  const obj = {
-    salon_name:  document.getElementById('set-name').value,
-    salon_addr:  document.getElementById('set-addr').value,
-    salon_phone: document.getElementById('set-phone').value
-  };
-  SB_DATA.settings = { ...SB_DATA.settings, ...obj };
-  try { await sb.from('settings').update(obj).eq('id', 1); } catch(e) { console.error(e); }
-  showToast('Sozlamalar saqlandi', 'ok');
-}
-
-async function aSaveHours() {
-  const defDays = ['Dushanba','Seshanba','Chorshanba','Payshanba','Juma','Shanba','Yakshanba'];
-  const hours = (SB_DATA.settings.work_hours || defDays.map(d => ({day:d}))).map((h,i) => ({
-    day:    h.day || defDays[i] || '',
-    open:   document.getElementById(`sh-o-${i}`)?.value || '09:00',
-    close:  document.getElementById(`sh-c-${i}`)?.value || '20:00',
-    active: document.getElementById(`sh-t-${i}`)?.classList.contains('on') || false
-  }));
-  SB_DATA.settings.work_hours = hours;
-  try { await sb.from('settings').update({ work_hours: hours }).eq('id', 1); } catch(e) { console.error(e); }
-  showToast('Ish vaqti saqlandi', 'ok');
-}
-
-function aExportData() {
-  const blob = new Blob([JSON.stringify(SB_DATA, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href     = URL.createObjectURL(blob);
-  a.download = 'termiz_barber_export.json';
-  a.click();
-  showToast("Ma'lumotlar export qilindi", 'ok');
-}
-
-async function aClearDone() {
-  if (!confirm("Bajarilgan navbatlarni o'chirishni xohlaysizmi?")) return;
-  try { await sb.from('bookings').delete().eq('status', 'done'); } catch(e) { console.error(e); }
-  SB_DATA.allBookings = (SB_DATA.allBookings || []).filter(b => b.status !== 'done');
-  aDashboard(); aRenderBookings(); aRenderClients();
-  showToast('Bajarilganlar tozalandi', 'ok');
-}
-
-// ADMINS
-function aRenderAdmins() {
-  document.getElementById('a-admins-tbody').innerHTML = (SB_DATA.admins || []).map(a => `
-    <tr>
-      <td><span style="font-family:'JetBrains Mono',monospace;color:#F0B429">${a.telegram_id}</span></td>
-      <td>${a.name}</td>
-      <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#606078">${new Date(a.created_at).toLocaleDateString()}</td>
-      <td>
-        <button class="a-act-btn del" onclick="aDeleteAdmin('${a.telegram_id}')">
-          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3,6 5,6 21,6"/><path d="M19,6l-1,14H5L4,6"/></svg>
-        </button>
-      </td>
-    </tr>`).join('') || '<tr><td colspan="4" style="text-align:center;padding:30px;color:#606078">Adminlar yo\'q</td></tr>';
-}
-
-function aOpenAdminModal() { aOpenModal('m-admin'); }
-
-async function aSaveAdmin() {
-  const tgid = document.getElementById('m-adm-id').value.trim();
-  const name = document.getElementById('m-adm-name').value.trim();
-  if (!tgid) { showToast('Telegram ID kiriting!', 'err'); return; }
-  const obj = { telegram_id: tgid, name: name || 'Admin', created_at: new Date().toISOString() };
-  try { await sb.from('admins').upsert(obj); } catch(e) { console.error(e); }
-  const idx = (SB_DATA.admins || []).findIndex(a => a.telegram_id === tgid);
-  if (idx >= 0) SB_DATA.admins[idx] = obj;
-  else { if (!SB_DATA.admins) SB_DATA.admins = []; SB_DATA.admins.push(obj); }
-  aCloseModal('m-admin');
-  aRenderAdmins();
-  showToast("Admin qo'shildi", 'ok');
-}
-
-async function aDeleteAdmin(tgid) {
-  if (tgid === String(TG_USER?.id)) { showToast("O'zingizni o'chira olmaysiz!", 'err'); return; }
-  if (!confirm("Adminni o'chirishni xohlaysizmi?")) return;
-  try { await sb.from('admins').delete().eq('telegram_id', tgid); } catch(e) { console.error(e); }
-  SB_DATA.admins = (SB_DATA.admins || []).filter(a => a.telegram_id !== tgid);
-  aRenderAdmins();
-  showToast("Admin o'chirildi", 'err');
-}
-
-// MODAL
-function aOpenModal(id)  { document.getElementById(id).classList.add('open'); }
-function aCloseModal(id) { document.getElementById(id).classList.remove('open'); }
-document.querySelectorAll('.a-modal-overlay').forEach(m => {
-  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
-});
-
-// BUG 1 FIX: Add Escape key handler to close modals
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape' || e.keyCode === 27) {
-    // Close all open modals
-    document.querySelectorAll('.a-modal.open').forEach(m => m.classList.remove('open'));
-  }
-});
-
-// BUG 1 FIX: Add sidebar toggle function
-function aToggleSidebar() {
-  const sidebar = document.getElementById('a-sidebar');
-  if (sidebar) {
-    sidebar.classList.toggle('open');
-  }
-}
-
-// BUG 1 FIX: Click outside to close sidebar on mobile
-document.addEventListener('click', function(e) {
-  const sidebar = document.getElementById('a-sidebar');
-  const menuBtn = document.getElementById('a-menu-btn');
-  if (sidebar && sidebar.classList.contains('open')) {
-    if (!sidebar.contains(e.target) && (!menuBtn || !menuBtn.contains(e.target))) {
-      sidebar.classList.remove('open');
-    }
-  }
-});
 </script>
 </body>
 </html>
