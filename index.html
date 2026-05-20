@@ -33,7 +33,7 @@ body{font-family:'Outfit',sans-serif}
 .ld-ring{width:90px;height:90px;border-radius:50%;border:1px solid #261E2E;display:flex;align-items:center;justify-content:center;position:relative;margin-bottom:24px}
 .ld-ring::before{content:'';position:absolute;inset:-8px;border-radius:50%;border:1px solid rgba(212,128,42,0.2);animation:ldspin 3s linear infinite}
 @keyframes ldspin{to{transform:rotate(360deg)}}
-.ld-scissors{font-size:32px}
+.ld-scissors{font-size:32px;color:#c0c0c0;display:flex;align-items:center;justify-content:center}
 .ld-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:900;letter-spacing:5px;color:#F0A842;text-align:center}
 .ld-bar{width:140px;height:2px;background:#1D1622;border-radius:1px;margin-top:20px;overflow:hidden}
 .ld-progress{height:100%;background:#D4802A;border-radius:1px;animation:ldbar 1.8s ease forwards}
@@ -481,7 +481,7 @@ select.a-form-input option{background:#1A1A1E}
 
 <!-- LOADING -->
 <div id="loading-screen">
-  <div class="ld-ring"><div class="ld-scissors"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="filter:drop-shadow(0 0 4px rgba(0,0,0,0.8))"><path d="M6 2L2 8l10 14L22 8l-4-6H6zm1.5 0h9L18 6H6l1.5-4zM3.5 8h17L12 20 3.5 8z"/></svg></div></div>
+  <div class="ld-ring"><div class="ld-scissors"><svg width="36" height="36" viewBox="0 0 24 24" fill="#c0c0c0" style="filter:drop-shadow(0 0 8px rgba(192,192,192,0.4))"><path d="M6 2L2 8l10 14L22 8l-4-6H6zm1.5 0h9L18 6H6l1.5-4zM3.5 8h17L12 20 3.5 8z"/></svg></div></div>
   <div class="ld-title">BLACK DIAMOND</div>
   <div class="ld-bar"><div class="ld-progress"></div></div>
   <div class="ld-status" id="ld-status">Tekshirilmoqda...</div>
