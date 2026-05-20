@@ -1282,9 +1282,13 @@ function cFillSum() {
 }
 
 async function cConfirmBk() {
+  const btn = document.querySelector('#cs4 .btn-p');
+  if (btn?.disabled) return; // double-submit himoya
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Saqlanmoqda...'; }
   // Telefon raqam botdan olingan — o'zgartirish mumkin emas
   const ph = TG_USER?.phone || '';
   if (!ph) {
+    if (btn) { btn.disabled = false; btn.textContent = '✓ Navbatni tasdiqlash'; }
     showToast("📱 Avval botga /start yuboring va telefon ulashing!", 'err');
     setTimeout(() => { if (tg) tg.openTelegramLink('https://t.me/termizwebbarber_bot'); }, 1500);
     return;
