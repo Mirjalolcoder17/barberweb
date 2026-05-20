@@ -1354,7 +1354,7 @@ async function notifyBot(bk) {
     } catch(e) { console.error('Bot xatosi:', e); }
   }
 
-  // Barberga yuborish (faqat ma'lumot, tugmasiz)
+  // Barberga yuborish (tasdiqlash tugmalari bilan)
   const barber = SB_DATA.barbers.find(b => b.name === bk.barber_name);
   if (barber?.telegram_id) {
     const barberMsg = `💈 <b>Yangi navbat sizga!</b>\n\n` +
@@ -1367,7 +1367,15 @@ async function notifyBot(bk) {
     try {
       await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: barber.telegram_id, text: barberMsg, parse_mode: 'HTML' })
+        body: JSON.stringify({
+          chat_id: barber.telegram_id,
+          text: barberMsg,
+          parse_mode: 'HTML',
+          reply_markup: JSON.stringify({ inline_keyboard: [[
+            { text: '✅ Tasdiqlash', callback_data: 'accept_' + (bk.id || Date.now()) },
+            { text: '❌ Bekor qilish', callback_data: 'cancel_' + (bk.id || Date.now()) }
+          ]]})
+        })
       });
     } catch(e) { console.error('Barber bot xatosi:', e); }
   }
