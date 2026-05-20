@@ -431,7 +431,14 @@ app.post('/api/queue', async (req, res) => {
 // Long polling
 // ============================================================
 let pollOffset = 0;
+let lastReminderCheck = 0;
+
 async function pollUpdates() {
+  // Har daqiqada reminder tekshirish (polling loop ichida)
+  if (Date.now() - lastReminderCheck > 60000) {
+    lastReminderCheck = Date.now();
+    checkReminders();
+  }
   try {
     const r = await fetchFn(`${TG_API}/getUpdates?timeout=30&offset=${pollOffset}`);
     const j = await r.json();
