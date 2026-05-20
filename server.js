@@ -1,23 +1,3 @@
-/**
- * WebBarber - Backend Server
- * ==========================
- * - POST /api/queue  -> mijozdan kelgan navbat ma'lumotini qabul qiladi
- *                       va Telegram orqali admin chatga sendMessage qiladi
- *                       (inline tugmalar: ✅ Qabul qilindi / ❌ Kechiktirildi).
- * - Bot callback_query handler -> admin tugmani bossa, bot javob qaytaradi
- *                                 va xabarga status qo'shib qo'yadi.
- *
- * Run:
- *   npm install
- *   npm start
- *
- * .env:
- *   BOT_TOKEN=...
- *   ADMIN_CHAT_ID=...
- *   PORT=3000               (ixtiyoriy)
- *   USE_POLLING=true        (default: true; webhook ishlatsangiz "false" qiling)
- */
-
 'use strict';
 
 require('dotenv').config();
@@ -27,196 +7,309 @@ const path = require('path');
 const PORT = process.env.PORT || 3000;
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const ADMIN_CHAT_ID = process.env.ADMIN_CHAT_ID;
+const MINI_APP_URL = process.env.MINI_APP_URL || 'https://your-mini-app-url.com'; // .env da sozlang
 const TG_API = `https://api.telegram.org/bot${BOT_TOKEN}`;
+
+// Supabase (server tomonda users jadvaliga yozish uchun)
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY; // service role key
 
 if (!BOT_TOKEN || !ADMIN_CHAT_ID) {
   console.error('❌ BOT_TOKEN va ADMIN_CHAT_ID .env faylida ko\'rsatilishi shart.');
   process.exit(1);
 }
 
-// Node 18+ uchun global fetch mavjud. Eski Node uchun node-fetch ishlatiladi.
 const fetchFn = (typeof fetch !== 'undefined')
   ? fetch
   : (...args) => import('node-fetch').then(({ default: f }) => f(...args));
 
 const app = express();
 app.use(express.json());
-
-// Statik fayllar (index.html va boshqalar) shu serverdan beriladi.
 app.use(express.static(path.join(__dirname)));
 
-/* ============================================================
- * POST /api/queue
- *   body: { name, service, time, queueNumber }
- * ============================================================ */
-app.post('/api/queue', async (req, res) => {
+// ============================================================
+// Supabase helper — users jadvaliga yozish/o'qish
+// ============================================================
+async function sbRequest(method, endpoint, body = null) {
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) return null;
+  const opts = {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': SUPABASE_SERVICE_KEY,
+      'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+      'Prefer': method === 'POST' ? 'resolution=merge-duplicates,return=representation' : 'return=representation'
+    }
+  };
+  if (body) opts.body = JSON.stringify(body);
   try {
-    const { name, service, time, queueNumber } = req.body || {};
-
-    if (!name || !service || !time || queueNumber === undefined || queueNumber === null) {
-      return res.status(400).json({
-        ok: false,
-        error: '`name`, `service`, `time`, `queueNumber` maydonlari talab qilinadi.'
-      });
-    }
-
-    const text =
-      `🆕 *Yangi navbat*\n\n` +
-      `🔢 Navbat raqami: *#${escapeMd(String(queueNumber))}*\n` +
-      `👤 Mijoz: ${escapeMd(String(name))}\n` +
-      `✂️ Xizmat: ${escapeMd(String(service))}\n` +
-      `🕒 Vaqt: ${escapeMd(String(time))}`;
-
-    const reply_markup = {
-      inline_keyboard: [[
-        { text: '✅ Qabul qilindi',  callback_data: `accept_${queueNumber}` },
-        { text: '❌ Kechiktirildi', callback_data: `delay_${queueNumber}`  }
-      ]]
-    };
-
-    const tgResp = await fetchFn(`${TG_API}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: ADMIN_CHAT_ID,
-        text,
-        parse_mode: 'Markdown',
-        reply_markup
-      })
-    });
-
-    const tgData = await tgResp.json();
-    if (!tgData.ok) {
-      console.error('Telegram sendMessage error:', tgData);
-      return res.status(502).json({ ok: false, error: 'Telegram API xatosi', details: tgData });
-    }
-
-    return res.json({
-      ok: true,
-      queueNumber,
-      telegramMessageId: tgData.result.message_id
-    });
-  } catch (err) {
-    console.error('POST /api/queue error:', err);
-    return res.status(500).json({ ok: false, error: 'Server ichki xatosi' });
-  }
-});
-
-/* ============================================================
- * Webhook variant (ixtiyoriy)
- *   Telegramda webhook qilib: setWebhook?url=https://your.host/api/telegram/webhook
- * ============================================================ */
-app.post('/api/telegram/webhook', async (req, res) => {
-  try {
-    const update = req.body;
-    if (update && update.callback_query) {
-      await handleCallback(update.callback_query);
-    }
-    res.json({ ok: true });
-  } catch (err) {
-    console.error('Webhook error:', err);
-    res.json({ ok: true }); // har doim 200 qaytarish kerak
-  }
-});
-
-/* ============================================================
- * Callback query handler
- *   accept_<queueNumber> -> ✅
- *   delay_<queueNumber>  -> ❌
- * ============================================================ */
-async function handleCallback(cb) {
-  const data = cb.data || '';
-  const chatId = cb.message && cb.message.chat && cb.message.chat.id;
-  const messageId = cb.message && cb.message.message_id;
-  const originalText = (cb.message && cb.message.text) || '';
-
-  let answerText = '';
-  let confirmation = '';
-
-  if (data.startsWith('accept_')) {
-    const num = data.slice('accept_'.length);
-    answerText = `✅ Navbat #${num} qabul qilindi`;
-    confirmation = `\n\n✅ *Qabul qilindi* (#${num})`;
-  } else if (data.startsWith('delay_')) {
-    const num = data.slice('delay_'.length);
-    answerText = `❌ Navbat #${num} kechiktirildi`;
-    confirmation = `\n\n❌ *Kechiktirildi* (#${num})`;
-  } else {
-    answerText = 'Noma\'lum buyruq';
-  }
-
-  // 1) Callback queryga javob (tugmadagi loading spinnerni o'chiradi)
-  try {
-    await fetchFn(`${TG_API}/answerCallbackQuery`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ callback_query_id: cb.id, text: answerText, show_alert: false })
-    });
-  } catch (err) {
-    console.error('answerCallbackQuery error:', err);
-  }
-
-  // 2) Asl xabarni tahrirlash — tugmalarni o'chirish va status qo'shish
-  if (chatId && messageId && confirmation) {
-    try {
-      await fetchFn(`${TG_API}/editMessageText`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: chatId,
-          message_id: messageId,
-          text: originalText + confirmation,
-          parse_mode: 'Markdown',
-          reply_markup: { inline_keyboard: [] }
-        })
-      });
-    } catch (err) {
-      console.error('editMessageText error:', err);
-    }
+    const r = await fetchFn(`${SUPABASE_URL}/rest/v1/${endpoint}`, opts);
+    return await r.json();
+  } catch (e) {
+    console.error('Supabase error:', e.message);
+    return null;
   }
 }
 
-/* ============================================================
- * Long-polling (default).
- *   Webhook ishlatsangiz, .env da USE_POLLING=false qiling.
- * ============================================================ */
+async function getUser(telegram_id) {
+  const data = await sbRequest('GET', `users?telegram_id=eq.${telegram_id}&select=*`);
+  return Array.isArray(data) ? data[0] : null;
+}
+
+async function upsertUser(telegram_id, first_name, username, phone) {
+  return sbRequest('POST', 'users', {
+    telegram_id: String(telegram_id),
+    first_name: first_name || '',
+    username: username || '',
+    phone: phone || '',
+    registered_at: new Date().toISOString()
+  });
+}
+
+// ============================================================
+// Telegram API helpers
+// ============================================================
+async function sendMessage(chat_id, text, extra = {}) {
+  return fetchFn(`${TG_API}/sendMessage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id, text, parse_mode: 'HTML', ...extra })
+  }).then(r => r.json()).catch(e => console.error('sendMessage error:', e));
+}
+
+async function answerCallback(callback_query_id, text) {
+  return fetchFn(`${TG_API}/answerCallbackQuery`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ callback_query_id, text, show_alert: false })
+  }).catch(() => {});
+}
+
+async function editMessage(chat_id, message_id, text) {
+  return fetchFn(`${TG_API}/editMessageText`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      chat_id, message_id, text,
+      parse_mode: 'HTML',
+      reply_markup: { inline_keyboard: [] }
+    })
+  }).catch(() => {});
+}
+
+// ============================================================
+// /start handler
+// ============================================================
+async function handleStart(msg) {
+  const chatId = msg.chat.id;
+  const user = msg.from;
+  const tgId = String(user.id);
+
+  // Bazada bor-yo'qligini tekshir
+  const existing = await getUser(tgId);
+
+  if (existing && existing.phone) {
+    // Allaqachon ro'yxatdan o'tgan — mini app ni ochish tugmasi
+    await sendMessage(chatId,
+      `👋 Xush kelibsiz, <b>${user.first_name}</b>!\n\n` +
+      `✅ Siz allaqachon ro'yxatdan o'tgansiz.\n` +
+      `📱 Telefon: <code>${existing.phone}</code>\n\n` +
+      `Navbat olish uchun quyidagi tugmani bosing:`,
+      {
+        reply_markup: JSON.stringify({
+          inline_keyboard: [[
+            { text: '✂️ Navbat olish', web_app: { url: MINI_APP_URL } }
+          ]]
+        })
+      }
+    );
+  } else {
+    // Yangi foydalanuvchi — telefon so'rash
+    await sendMessage(chatId,
+      `👋 Salom, <b>${user.first_name}</b>!\n\n` +
+      `🏪 <b>Termiz Barber</b> ga xush kelibsiz!\n\n` +
+      `📲 Mini appdan foydalanish uchun avval <b>telefon raqamingizni</b> ulashing.\n` +
+      `Quyidagi tugmani bosing:`,
+      {
+        reply_markup: JSON.stringify({
+          keyboard: [[
+            { text: '📱 Telefon raqamni ulashish', request_contact: true }
+          ]],
+          resize_keyboard: true,
+          one_time_keyboard: true
+        })
+      }
+    );
+  }
+}
+
+// ============================================================
+// Contact handler — foydalanuvchi telefon ulashganda
+// ============================================================
+async function handleContact(msg) {
+  const chatId = msg.chat.id;
+  const contact = msg.contact;
+  const user = msg.from;
+
+  // Faqat o'z raqamini ulashishi kerak
+  if (String(contact.user_id) !== String(user.id)) {
+    await sendMessage(chatId, '❌ Faqat o\'z telefon raqamingizni ulashing.');
+    return;
+  }
+
+  const phone = contact.phone_number.startsWith('+')
+    ? contact.phone_number
+    : '+' + contact.phone_number;
+
+  // Bazaga saqlash
+  await upsertUser(user.id, user.first_name, user.username || '', phone);
+
+  // Klaviaturani olib tashlash va mini app tugmasini ko'rsatish
+  await sendMessage(chatId,
+    `✅ <b>Ro'yxatdan o'tdingiz!</b>\n\n` +
+    `👤 Ism: <b>${user.first_name}</b>\n` +
+    `📱 Telefon: <code>${phone}</code>\n\n` +
+    `Endi navbat olishingiz mumkin 👇`,
+    {
+      reply_markup: JSON.stringify({
+        keyboard: [[]],
+        remove_keyboard: true
+      })
+    }
+  );
+
+  // Mini app tugmasi bilan yangi xabar
+  await sendMessage(chatId,
+    `🎉 Hammasi tayyor! Navbat olish uchun tugmani bosing:`,
+    {
+      reply_markup: JSON.stringify({
+        inline_keyboard: [[
+          { text: '✂️ Navbat olish', web_app: { url: MINI_APP_URL } }
+        ]]
+      })
+    }
+  );
+}
+
+// ============================================================
+// Callback query handler (admin inline tugmalar)
+// ============================================================
+async function handleCallback(cb) {
+  const data = cb.data || '';
+  const chatId = cb.message?.chat?.id;
+  const messageId = cb.message?.message_id;
+  const originalText = cb.message?.text || '';
+
+  let answerText = '';
+  let statusText = '';
+
+  if (data.startsWith('accept_')) {
+    const num = data.slice(7);
+    answerText = `✅ Navbat #${num} qabul qilindi`;
+    statusText = `\n\n✅ <b>Qabul qilindi</b>`;
+  } else if (data.startsWith('delay_')) {
+    const num = data.slice(6);
+    answerText = `❌ Navbat #${num} kechiktirildi`;
+    statusText = `\n\n❌ <b>Kechiktirildi</b>`;
+  }
+
+  await answerCallback(cb.id, answerText);
+  if (chatId && messageId && statusText) {
+    await editMessage(chatId, messageId, originalText + statusText);
+  }
+}
+
+// ============================================================
+// Update dispatcher
+// ============================================================
+async function handleUpdate(update) {
+  if (update.message) {
+    const msg = update.message;
+    if (msg.text === '/start') {
+      await handleStart(msg);
+    } else if (msg.contact) {
+      await handleContact(msg);
+    }
+  } else if (update.callback_query) {
+    await handleCallback(update.callback_query);
+  }
+}
+
+// ============================================================
+// Webhook endpoint
+// ============================================================
+app.post('/api/telegram/webhook', async (req, res) => {
+  try {
+    await handleUpdate(req.body);
+  } catch (e) {
+    console.error('Webhook error:', e);
+  }
+  res.json({ ok: true });
+});
+
+// ============================================================
+// POST /api/queue — mijozdan navbat kelganda admin ga xabar
+// ============================================================
+app.post('/api/queue', async (req, res) => {
+  try {
+    const { name, service, time, queueNumber } = req.body || {};
+    if (!name || !service || !time || queueNumber == null) {
+      return res.status(400).json({ ok: false, error: 'Maydonlar yetishmayapti' });
+    }
+    const text =
+      `🔔 <b>Yangi navbat #${queueNumber}</b>\n\n` +
+      `👤 Mijoz: ${name}\n` +
+      `✂️ Xizmat: ${service}\n` +
+      `🕒 Vaqt: ${time}`;
+
+    const tgData = await sendMessage(ADMIN_CHAT_ID, text, {
+      reply_markup: JSON.stringify({
+        inline_keyboard: [[
+          { text: '✅ Qabul qilindi', callback_data: `accept_${queueNumber}` },
+          { text: '❌ Kechiktirildi', callback_data: `delay_${queueNumber}` }
+        ]]
+      })
+    });
+
+    return res.json({ ok: true, queueNumber, telegramMessageId: tgData?.result?.message_id });
+  } catch (e) {
+    console.error('/api/queue error:', e);
+    return res.status(500).json({ ok: false, error: 'Server xatosi' });
+  }
+});
+
+// ============================================================
+// Long polling
+// ============================================================
 let pollOffset = 0;
 async function pollUpdates() {
   try {
     const r = await fetchFn(`${TG_API}/getUpdates?timeout=30&offset=${pollOffset}`);
     const j = await r.json();
-    if (j && j.ok && Array.isArray(j.result)) {
+    if (j?.ok && Array.isArray(j.result)) {
       for (const upd of j.result) {
         pollOffset = upd.update_id + 1;
-        if (upd.callback_query) {
-          await handleCallback(upd.callback_query);
-        }
+        await handleUpdate(upd);
       }
     }
-  } catch (err) {
-    console.error('poll error:', err.message);
+  } catch (e) {
+    console.error('poll error:', e.message);
   } finally {
     setTimeout(pollUpdates, 1000);
   }
 }
 
-/* ============================================================
- * Yordamchi: Markdown'da maxsus belgilarni escape qilish
- * ============================================================ */
-function escapeMd(s) {
-  return String(s).replace(/([_*`\[\]])/g, '\\$1');
-}
-
-/* ============================================================
- * Server start
- * ============================================================ */
+// ============================================================
+// Start
+// ============================================================
 app.listen(PORT, () => {
-  console.log(`🚀 Server ishga tushdi: http://localhost:${PORT}`);
+  console.log(`🚀 Server: http://localhost:${PORT}`);
   console.log(`👤 ADMIN_CHAT_ID: ${ADMIN_CHAT_ID}`);
-  if (String(process.env.USE_POLLING || 'true').toLowerCase() !== 'false') {
-    console.log('📡 Telegram long-polling rejimi yoqilgan...');
+  console.log(`🔗 MINI_APP_URL: ${MINI_APP_URL}`);
+  if (String(process.env.USE_POLLING ?? 'true').toLowerCase() !== 'false') {
+    console.log('📡 Long-polling yoqildi...');
     pollUpdates();
   } else {
-    console.log('🔗 Webhook rejimi (POST /api/telegram/webhook)');
+    console.log('🔗 Webhook rejimi');
   }
 });
