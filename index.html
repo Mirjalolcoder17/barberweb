@@ -806,29 +806,19 @@ window.addEventListener('load', async () => {
     TG_USER = { id: String(u.id), first_name: u.first_name || 'Mehmon', username: u.username || '' };
   }
 
-  setLdStatus("Ro'yxat tekshirilmoqda...");
+  setLdStatus("Ma'lumotlar yuklanmoqda...");
 
-  // Foydalanuvchini bazada tekshirish
+  // Foydalanuvchini bazada tekshirish — telefon raqamini olish
   try {
     const { data: userData } = await sb.from('users')
-      .select('*')
+      .select('phone')
       .eq('telegram_id', String(TG_USER.id))
       .single();
-
-    if (!userData || !userData.phone) {
-      // Ro'yxatdan o'tmagan — xatolik ko'rsatish
-      showError("Siz ro'yxatdan o'tmagansiz! Botga /start yuboring va telefon raqamingizni ulashing.");
-      return;
-    }
-    // Telefon raqamni TG_USER ga saqlash
-    TG_USER.phone = userData.phone;
+    TG_USER.phone = userData?.phone || '';
   } catch(e) {
-    // users jadvali yo'q yoki xatolik — davom etish (DEV mode)
-    if (!TG_USER.phone) TG_USER.phone = '';
-    console.warn('Users tekshiruvi o'tkazilmadi:', e.message);
+    TG_USER.phone = '';
   }
 
-  setLdStatus("Ma'lumotlar yuklanmoqda...");
 
   try {
     const [bRes, sRes, setRes] = await Promise.all([
@@ -1279,7 +1269,8 @@ async function cConfirmBk() {
   // Telefon raqam botdan olingan — o'zgartirish mumkin emas
   const ph = TG_USER?.phone || '';
   if (!ph) {
-    showToast("Telefon raqam topilmadi. Botdan /start yuboring!", 'err');
+    showToast("📱 Avval botga /start yuboring va telefon ulashing!", 'err');
+    setTimeout(() => { if (tg) tg.openTelegramLink('https://t.me/TermizBarberBot'); }, 1500);
     return;
   }
   const bk = {
