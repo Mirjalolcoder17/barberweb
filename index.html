@@ -1335,26 +1335,44 @@ async function notifyBot(bk) {
     `💰 Summa: <b>${bk.total_price.toLocaleString()} so'm</b>\n` +
     `⏱ Davomiylik: ${bk.duration_min} daqiqa` +
     (bk.note ? `\n📝 Izoh: ${bk.note}` : '');
+
+  const adminPayload = {
+    text: msg, parse_mode: 'HTML',
+    reply_markup: JSON.stringify({ inline_keyboard: [[
+      { text: '✅ Qabul', callback_data: 'accept_' + (bk.id || Date.now()) },
+      { text: '❌ Bekor', callback_data: 'cancel_'  + (bk.id || Date.now()) }
+    ]]})
+  };
+
+  // Adminga yuborish (tasdiqlash tugmalari bilan)
   for (const adminId of ADMIN_IDS) {
     try {
       await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: adminId,
-          text: msg,
-          parse_mode: 'HTML',
-          reply_markup: JSON.stringify({
-            inline_keyboard: [[
-              { text: '✅ Qabul', callback_data: 'accept_' + (bk.id || Date.now()) },
-              { text: '❌ Bekor', callback_data: 'cancel_' + (bk.id || Date.now()) }
-            ]]
-          })
-        })
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: adminId, ...adminPayload })
       });
     } catch(e) { console.error('Bot xatosi:', e); }
   }
+
+  // Barberga yuborish (faqat ma'lumot, tugmasiz)
+  const barber = SB_DATA.barbers.find(b => b.name === bk.barber_name);
+  if (barber?.telegram_id) {
+    const barberMsg = `💈 <b>Yangi navbat sizga!</b>\n\n` +
+      `👤 Mijoz: <b>${bk.telegram_name || "Noma'lum"}</b>\n` +
+      `📱 Telefon: <code>${bk.phone || '—'}</code>\n` +
+      `💈 Xizmat: ${bk.services_text}\n` +
+      `📅 Sana: <b>${bk.booking_date} ${bk.booking_time}</b>\n` +
+      `⏱ Davomiylik: ${bk.duration_min} daqiqa` +
+      (bk.note ? `\n📝 Izoh: ${bk.note}` : '');
+    try {
+      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: barber.telegram_id, text: barberMsg, parse_mode: 'HTML' })
+      });
+    } catch(e) { console.error('Barber bot xatosi:', e); }
+  }
 }
+
 
 // HISTORY
 async function cLoadHistory() {
