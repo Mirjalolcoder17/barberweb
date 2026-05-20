@@ -13,9 +13,10 @@ const ADMIN_CHAT_ID = process.env.ADMIN_CHAT_ID;
 const MINI_APP_URL = process.env.MINI_APP_URL || 'https://your-mini-app-url.com'; // .env da sozlang
 const TG_API = `https://api.telegram.org/bot${BOT_TOKEN}`;
 
-// Supabase (server tomonda users jadvaliga yozish uchun)
-const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY; // service role key
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL || 'https://vezdgqyndfdafwcdrgfz.supabase.co';
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY
+  || process.env.VITE_SUPABASE_ANON_KEY
+  || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZlemRncXluZGZkYWZ3Y2RyZ2Z6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NzkwODAyNiwiZXhwIjoyMDkzNDg0MDI2fQ.lfl41wMlXsUM5QoBKLT3O7W9M-M6LW3ps2yt0K8cmpw';
 
 if (!BOT_TOKEN || !ADMIN_CHAT_ID) {
   console.warn('⚠️  BOT_TOKEN va ADMIN_CHAT_ID environment variables yo\'q.');
