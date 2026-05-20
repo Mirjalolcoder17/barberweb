@@ -106,6 +106,38 @@ async function editMessage(chat_id, message_id, text) {
 }
 
 // ============================================================
+// /barber handler — barber o'zini tanishtiradi
+// ============================================================
+async function handleBarberCheck(msg) {
+  const chatId = msg.chat.id;
+  const tgId = String(msg.from.id);
+
+  // barbers jadvalida telegram_id bor-yo'qligini tekshirish
+  const data = await sbRequest('GET', `barbers?telegram_id=eq.${tgId}&select=id,name,role,active`);
+  const barber = Array.isArray(data) ? data[0] : null;
+
+  if (!barber) {
+    await sendMessage(chatId,
+      `❌ Siz barberlar ro'yxatida <b>topilmadingiz</b>.\n\n` +
+      `Admin sizning Telegram IDингizни (<code>${tgId}</code>) barberlar jadvaliga qo'shishi kerak.`
+    );
+    return;
+  }
+
+  if (!barber.active) {
+    await sendMessage(chatId, `⚠️ Sizning profilingiz hozir <b>nofaol</b>. Admin bilan bog'laning.`);
+    return;
+  }
+
+  await sendMessage(chatId,
+    `✅ <b>Salom, ${barber.name}!</b>\n\n` +
+    `💈 Lavozim: ${barber.role}\n` +
+    `🆔 ID: <code>${tgId}</code>\n\n` +
+    `Endi sizga yangi navbatlar bu chatga keladi. Tayyor! 🎉`
+  );
+}
+
+// ============================================================
 // /start handler
 // ============================================================
 async function handleStart(msg) {
@@ -245,6 +277,8 @@ async function handleUpdate(update) {
     const msg = update.message;
     if (msg.text === '/start') {
       await handleStart(msg);
+    } else if (msg.text === '/barber') {
+      await handleBarberCheck(msg);
     } else if (msg.contact) {
       await handleContact(msg);
     }
