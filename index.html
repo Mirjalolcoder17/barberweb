@@ -922,6 +922,21 @@ function cSubscribeRealtime() {
       cRenderHome();
     })
     .subscribe();
+
+  // Bookings real-time — status o'zgarganda history yangilansin
+  sb.channel('bookings-client')
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'bookings',
+      filter: `telegram_id=eq.${TG_USER.id}` }, () => {
+      cLoadHistory();
+    })
+    .subscribe();
+
+  // Fallback: har 30 soniyada history yangilash
+  setInterval(() => {
+    if (document.getElementById('cp-history')?.classList.contains('active')) {
+      cLoadHistory();
+    }
+  }, 30000);
 }
 
 // ✅ TO'G'IRLANGAN: cGoPanel — el argument olib tashlandi, ID orqali ishlaydi
