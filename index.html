@@ -780,7 +780,7 @@ const SKELETON_SERVICES = `<div class="skel-svc"><div class="skel-svc-ico skelet
 <div class="skel-svc"><div class="skel-svc-ico skeleton"></div><div class="skel-svc-info"><div class="skel-svc-nm skeleton"></div><div class="skel-svc-tm skeleton"></div></div><div class="skel-svc-pr skeleton"></div></div>`;
 
 // Booking state
-let cSelB = '', cSelSvcs = [], cSelTotal = 0, cSelDur = 0, cSelDate = '', cSelTime = '';
+let cSelB = '', cSelBId = null, cSelSvcs = [], cSelTotal = 0, cSelDur = 0, cSelDate = '', cSelTime = '';
 
 // Calendar state — joriy oy
 const _now = new Date();
@@ -1089,7 +1089,7 @@ function cRenderBkBarbers() {
   }
 
   cont.innerHTML = barbers.map(b => `
-    <div class="bk-bc ${cSelB === b.name ? 's' : ''}" onclick="cPickBarber(this,'${esc(b.name)}')">
+    <div class="bk-bc ${cSelB === b.name ? 's' : ''}" onclick="cPickBarber(this,'${esc(b.name)}','${b.id}')">
       <div class="bk-ava">${b.avatar_url
         ? `<img src="${b.avatar_url}" onerror="this.parentNode.textContent='${b.name[0]}'">`
         : b.name[0]}</div>
@@ -1101,10 +1101,11 @@ function cRenderBkBarbers() {
   setBtnDisabled('cs-btn1', !cSelB || !barbers.some(b => b.name === cSelB));
 }
 
-function cPickBarber(el, name) {
+function cPickBarber(el, name, id) {
   document.querySelectorAll('.bk-bc').forEach(c => c.classList.remove('s'));
   el.classList.add('s');
   cSelB = name;
+  cSelBId = id;
   setBtnDisabled('cs-btn1', false);
 }
 
@@ -1291,6 +1292,7 @@ async function cConfirmBk() {
   const bk = {
     telegram_id:   TG_USER?.id || null,
     telegram_name: TG_USER?.first_name || null,
+    barber_id:     cSelBId,
     barber_name:   cSelB,
     services_text: cSelSvcs.map(s => s.name).join(', '),
     total_price:   cSelTotal,
@@ -1317,7 +1319,7 @@ async function cConfirmBk() {
 
   setTimeout(() => {
     // State tozalash
-    cSelB = ''; cSelSvcs = []; cSelTotal = 0; cSelDur = 0; cSelDate = ''; cSelTime = '';
+    cSelB = ''; cSelBId = null; cSelSvcs = []; cSelTotal = 0; cSelDur = 0; cSelDate = ''; cSelTime = '';
     document.getElementById('c-ph-inp').value   = '';
     document.getElementById('c-note-inp').value = '';
     cGoPanel('history');
