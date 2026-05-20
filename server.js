@@ -149,6 +149,49 @@ function scheduleReminder(booking) {
 }
 
 // ============================================================
+// Server-side reminder cron — har daqiqa tekshiradi
+// ============================================================
+const sentReminders = new Set(); // takroriy yuborishni oldini olish
+
+async function checkReminders() {
+  try {
+    // Bugungi pending navbatlarni olish
+    const now = new Date();
+    const todayStr = now.getDate() + ' ' +
+      ['Yanvar','Fevral','Mart','Aprel','May','Iyun','Iyul','Avgust','Sentyabr','Oktyabr','Noyabr','Dekabr'][now.getMonth()] +
+      ' ' + now.getFullYear();
+
+    const data = await sbRequest('GET',
+      `bookings?booking_date=eq.${encodeURIComponent(todayStr)}&status=eq.pending&select=id,telegram_id,telegram_name,barber_name,booking_time`
+    );
+    if (!Array.isArray(data)) return;
+
+    for (const bk of data) {
+      if (!bk.telegram_id || !bk.booking_time) continue;
+      const [h, m] = bk.booking_time.split(':').map(Number);
+      const bookingMs = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0).getTime();
+      const diffMin = (bookingMs - Date.now()) / 60000;
+
+      // 28-32 daqiqa oralig'ida yuborish (1 daqiqalik aniqlik uchun)
+      if (diffMin >= 28 && diffMin <= 32 && !sentReminders.has(bk.id)) {
+        sentReminders.add(bk.id);
+        const msg =
+          `⏰ <b>Hey, ${bk.telegram_name || "do'stim"}!</b>\n\n` +
+          `💈 Navbatingizga atigi <b>30 daqiqa</b> qoldi!\n\n` +
+          `🕐 Vaqt: <b>${bk.booking_time}</b>\n` +
+          `✂️ Master: <b>${bk.barber_name}</b>\n\n` +
+          `🏃 Uydan chiqish vaqti keldi — aks holda soch o'sib ketadi! 😄\n` +
+          `💎 <b>Black Diamond</b> da sizni kutamiz!`;
+        await sendMessage(bk.telegram_id, msg);
+        console.log(`⏰ Reminder sent to ${bk.telegram_name} (${bk.booking_time})`);
+      }
+    }
+  } catch(e) {
+    console.error('checkReminders error:', e.message);
+  }
+}
+
+// ============================================================
 // /barber handler — barber o'zini tanishtiradi
 // ============================================================
 async function handleBarberCheck(msg) {
@@ -343,6 +386,14 @@ app.post('/api/telegram/webhook', async (req, res) => {
 });
 
 // ============================================================
+// Cron endpoint — Vercel har daqiqa chaqiradi
+// ============================================================
+app.get('/api/cron/reminders', async (req, res) => {
+  await checkReminders();
+  res.json({ ok: true, time: new Date().toISOString() });
+});
+
+// ============================================================
 // POST /api/queue — mijozdan navbat kelganda admin ga xabar
 // ============================================================
 app.post('/api/queue', async (req, res) => {
@@ -406,6 +457,9 @@ if (require.main === module) {
     if (String(process.env.USE_POLLING ?? 'true').toLowerCase() !== 'false') {
       pollUpdates();
     }
+    // Reminder cron — har 60 soniya
+    setInterval(checkReminders, 60 * 1000);
+    checkReminders();
   });
 }
 
