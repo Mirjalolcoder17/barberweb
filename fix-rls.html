@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<script>
+const SUPABASE_URL = 'https://vezdgqyndfdafwcdrgfz.supabase.co';
+const SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZlemRncXluZGZkYWZ3Y2RyZ2Z6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NzkwODAyNiwiZXhwIjoyMDkzNDg0MDI2fQ.lfl41wMlXsUM5QoBKLT3O7W9M-M6LW3ps2yt0K8cmpw';
+
+const sb = supabase.createClient(SUPABASE_URL, SERVICE_KEY, {
+  auth: { persistSession: false }
+});
+
+async function fixRLS() {
+  console.log('Checking barbers table RLS...');
+
+  // Check if RLS is enabled
+  var { data: rlsStatus } = await sb.rpc('pg_tables_is_rls_enabled', { table_name: 'barbers' });
+  console.log('RLS status for barbers:', rlsStatus);
+
+  // Try to disable RLS
+  try {
+    await sb.from('barbers').update({ name: 'test' }).eq('id', '00000000-0000-0000-0000-000000000000');
+  } catch(e) {
+    console.log('Update test error:', e.message);
+  }
+
+  // Try delete
+  try {
+    await sb.from('barbers').delete().eq('id', '00000000-0000-0000-0000-000000000000');
+  } catch(e) {
+    console.log('Delete test error:', e.message);
+  }
+
+  console.log('Done. Check console for errors.');
+}
+
+fixRLS();
+</script>
+</body>
+</html>
