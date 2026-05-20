@@ -1292,7 +1292,6 @@ async function cConfirmBk() {
   const bk = {
     telegram_id:   TG_USER?.id || null,
     telegram_name: TG_USER?.first_name || null,
-    barber_id:     cSelBId,
     barber_name:   cSelB,
     services_text: cSelSvcs.map(s => s.name).join(', '),
     total_price:   cSelTotal,
