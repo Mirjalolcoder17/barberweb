@@ -313,6 +313,19 @@ async function handleContact(msg) {
       })
     }
   );
+
+  // Lokatsiya yuborish
+  await fetchFn(`${TG_API}/sendVenue`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      chat_id: chatId,
+      latitude: 37.234915,
+      longitude: 67.281060,
+      title: '💈 Black Diamond Barbershop',
+      address: 'Alisher Navoiy ko\'chasi, 34'
+    })
+  });
 }
 
 // ============================================================
