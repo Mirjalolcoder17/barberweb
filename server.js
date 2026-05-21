@@ -426,6 +426,78 @@ app.post('/api/queue', async (req, res) => {
 });
 
 // ============================================================
+// 20 kunlik mijoz qaytarish reminder
+// ============================================================
+const returnMessages = [
+  `💇 <b>Sochlaringiz osib qoldi-ku, kelmaysizmi?</b>\n\n😅 Biz sizni sog'indik! Sochlaringiz ham bizni sog'ingan — ular har kuni 0.4mm o'sib sizga "barbarga bor" deb signal beryapti!\n\n✂️ Keling, yana chiroyli qilib qo'yamiz!\n💎 <b>Black Diamond</b> kutmoqda!`,
+
+  `🪞 <b>Bugun oynaga qaradingizmi?</b>\n\n🤔 Sochlaringiz "menga e'tibor bermayapsan" deb xafa bo'lyapti. Ular sizga xabar yozolmaydi, shuning uchun biz yozyapmiz!\n\n💈 20 kun bo'ldi — vaqti keldi!\n💎 <b>Black Diamond</b> da kutamiz!`,
+
+  `🦁 <b>Sher bo'lib qoldingizmi?</b>\n\n😂 20 kun oldin chiroyli edingiz, hozir... xo'sh, sher ham chiroyli-da! Lekin barberga borgan sher yanada chiroyliroq!\n\n✂️ Keling, yana top formaga qaytaramiz!\n💎 <b>Black Diamond</b>`,
+
+  `📅 <b>20 kun o'tdi — sochlaringiz isyon ko'taryapti!</b>\n\n🙃 Ular sizga aytmoqchi: "Ey xo'jayin, barbarga olib bor, uyalamiz!"\n\nBiz tayyor, siz-chi?\n💎 <b>Black Diamond</b> da kutamiz!`,
+
+  `🚨 <b>DIQQAT: Soch uzayish darajasi — KRITIK!</b>\n\n📊 Tahlil natijalari:\n- Oxirgi tashrif: 20 kun oldin\n- Soch uzunligi: xavfli darajada\n- Chiroylilk indeksi: pasaymoqda 📉\n\n💊 Yechim: Zudlik bilan <b>Black Diamond</b> ga tashrif buyuring!\n✂️ Biz davolaymiz! 😄`,
+
+  `🧔 <b>Soqol va soch — nazoratdan chiqyapti!</b>\n\n😱 Qo'shnilar sizni taniyolmay qolishidan olddin keling!\n\n20 kun — bu juda ko'p. Sochlaringiz sizni kechirishga tayyor, faqat barbarga olib boring!\n💎 <b>Black Diamond</b>`,
+
+  `💬 <b>Sochlaringizdan xabar:</b>\n\n"Salom xo'jayin, biz 20 kundan beri parvarishsizmiz. Iltimos, bizni barbarga olib boring. Biz chiroyli bo'lishni xohlaymiz! 😢"\n\n✂️ Javob bering — <b>Black Diamond</b> ga keling!\n💎`,
+
+  `🎬 <b>Film sarlavhasi:</b> "20 kun barbarsiz"\n\n🍿 Janr: Drama, komediya\n⭐ Bosh qahramon: Siz\n📖 Syujet: Mijoz barbarga bormaydi, sochlar isyon ko'taradi...\n\n🎭 Happy ending uchun — <b>Black Diamond</b> ga keling!\n✂️`
+];
+
+async function checkReturnReminder() {
+  try {
+    // 20 kun oldingi sanani hisoblash
+    const now = new Date();
+    const d20 = new Date(now.getTime() - 20 * 24 * 60 * 60 * 1000);
+    const monthNames = ['Yanvar','Fevral','Mart','Aprel','May','Iyun','Iyul','Avgust','Sentyabr','Oktyabr','Noyabr','Dekabr'];
+    const targetDate = `${d20.getDate()} ${monthNames[d20.getMonth()]} ${d20.getFullYear()}`;
+
+    // 20 kun oldin navbat olgan mijozlarni topish
+    const data = await sbRequest('GET',
+      `bookings?booking_date=eq.${encodeURIComponent(targetDate)}&status=eq.done&select=telegram_id,telegram_name`
+    );
+    if (!Array.isArray(data) || data.length === 0) return;
+
+    // Har bir mijozga tekshirish — oxirgi 20 kun ichida boshqa navbat bormi
+    for (const bk of data) {
+      if (!bk.telegram_id) continue;
+
+      // Oxirgi 19 kun ichida yangi navbat bormi tekshirish
+      const recent = await sbRequest('GET',
+        `bookings?telegram_id=eq.${bk.telegram_id}&status=eq.done&order=created_at.desc&limit=1&select=booking_date`
+      );
+      if (Array.isArray(recent) && recent.length > 0) {
+        const last = recent[0].booking_date;
+        if (last !== targetDate) continue; // yangi navbat bor, skip
+      }
+
+      // Random xabar tanlash
+      const msg = returnMessages[Math.floor(Math.random() * returnMessages.length)];
+      await sendMessage(bk.telegram_id, msg, {
+        reply_markup: JSON.stringify({
+          inline_keyboard: [[
+            { text: '✂️ Navbat olish', web_app: { url: MINI_APP_URL } }
+          ]]
+        })
+      });
+      console.log(`📩 Return reminder sent to ${bk.telegram_name || bk.telegram_id}`);
+    }
+  } catch(e) {
+    console.error('checkReturnReminder error:', e.message);
+  }
+}
+
+// ============================================================
+// Cron endpoint — 20 kunlik qaytarish reminder (kuniga 1 marta)
+// ============================================================
+app.get('/api/cron/return-reminder', async (req, res) => {
+  await checkReturnReminder();
+  res.json({ ok: true, checked: true, time: new Date().toISOString() });
+});
+
+// ============================================================
 // Long polling
 // ============================================================
 let pollOffset = 0;
@@ -465,6 +537,9 @@ if (require.main === module) {
     // Reminder cron — har 60 soniya
     setInterval(checkReminders, 60 * 1000);
     checkReminders();
+    // Return reminder — kuniga 1 marta (har 24 soat)
+    setInterval(checkReturnReminder, 24 * 60 * 60 * 1000);
+    checkReturnReminder();
   });
 }
 

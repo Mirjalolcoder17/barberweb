@@ -1154,6 +1154,7 @@ function cToggleSvc(el, id) {
     if (chk) chk.textContent = '✓';
   }
   setBtnDisabled('cs-btn2', cSelSvcs.length === 0);
+  if (cSelDate) cBuildSlots();
 }
 
 // CALENDAR
@@ -1209,23 +1210,30 @@ async function cBuildSlots() {
     '09:00','09:30','10:00','10:30','11:00','11:30',
     '12:00','12:30','13:00','13:30','14:00','14:30',
     '15:00','15:30','16:00','16:30','17:00','17:30',
-    '18:00','18:30'
+    '18:00','18:30','19:00','19:30','20:00','20:30',
+    '21:00','21:30','22:00','22:30','23:00'
   ];
 
-  let booked = [];
+  let bookedRanges = [];
   try {
     if (cSelB && cSelDate) {
       const { data } = await sb.from('bookings')
-        .select('booking_time')
+        .select('booking_time,duration_min')
         .eq('barber_name', cSelB)
         .eq('booking_date', cSelDate)
         .in('status', ['pending', 'done']);
-      booked = (data || []).map(x => x.booking_time);
+      bookedRanges = (data || []).map(x => {
+        const [h,m] = x.booking_time.split(':').map(Number);
+        return { start: h*60+m, end: h*60+m+(x.duration_min||30) };
+      });
     }
   } catch(e) {
-    booked = (SB_DATA.allBookings || [])
+    bookedRanges = (SB_DATA.allBookings || [])
       .filter(b => b.barber_name === cSelB && b.booking_date === cSelDate && ['pending','done'].includes(b.status))
-      .map(b => b.booking_time);
+      .map(b => {
+        const [h,m] = b.booking_time.split(':').map(Number);
+        return { start: h*60+m, end: h*60+m+(b.duration_min||30) };
+      });
   }
 
   // O'tib ketgan vaqtlarni aniqlash (bugun tanlanganda)
@@ -1235,11 +1243,13 @@ async function cBuildSlots() {
   const nowMins  = now.getHours() * 60 + now.getMinutes();
 
   cont.innerHTML = '';
+  const myDur = cSelDur || 30;
   times.forEach(t => {
     const [h, m]  = t.split(':').map(Number);
     const slotMin = h * 60 + m;
+    const slotEnd = slotMin + myDur;
     const isPast  = isToday && slotMin <= nowMins;
-    const isBusy  = booked.includes(t);
+    const isBusy  = bookedRanges.some(r => slotMin < r.end && slotEnd > r.start);
     const disabled = isPast || isBusy;
 
     const s = document.createElement('div');
